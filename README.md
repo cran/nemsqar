@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# nemsqar <img src="man/figures/nemsqar_final.png" align="right" width="250" alt="" />
+# nemsqar <a href="https://bemts-hhs.github.io/nemsqar/"><img src="man/figures/logo.png" align="right" height="120" alt="nemsqar website" /></a>
 
 <!-- badges: start -->
 
@@ -10,6 +10,11 @@ stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://
 [![R-CMD-check](https://github.com/bemts-hhs/nemsqar/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/bemts-hhs/nemsqar/actions/workflows/R-CMD-check.yaml)
 [![CRAN
 status](https://www.r-pkg.org/badges/version/nemsqar)](https://CRAN.R-project.org/package=nemsqar)
+![CRAN total
+downloads](https://cranlogs.r-pkg.org/badges/grand-total/nemsqar) ![CRAN
+monthly downloads](https://cranlogs.r-pkg.org/badges/last-month/nemsqar)
+![CRAN weekly
+downloads](https://cranlogs.r-pkg.org/badges/last-week/nemsqar)
 [![Codecov test
 coverage](https://codecov.io/gh/bemts-hhs/nemsqar/graph/badge.svg)](https://app.codecov.io/gh/bemts-hhs/nemsqar?branch=main)
 <!-- badges: end -->
@@ -86,31 +91,29 @@ after creating a user profile.
 - Developed and in package: ✔️
 - Slated for future development: 🔧
 
-| **Measure ID** | **Description** | **Type** | **National Quality Strategy Domain** | **Developed in Package?** |
-|----|----|----|----|----|
-| Airway-01 | Percentage of EMS responses from a 911 request with successful advanced airway placement on first attempt without hypotension or hypoxia in peri-intubation period. | Outcome | Clinical Process – Effectiveness | :heavy_check_mark: |
-| Airway-05 | Percentage of intubation procedures from a 911 request in which adequate patient oxygen levels were achieved prior to intubation. | Process | Patient Safety | :heavy_check_mark: |
-| Airway-18 | Percentage of successful advanced airway procedures from a 911 request in which waveform capnography is used for confirmation and monitoring. | Process | Clinical Process – Effectiveness | ✔️ |
-| Asthma-01 | Percentage of EMS responses from a 911 request for asthma patients receiving an aerosolized beta agonist. | Process | Clinical Process – Effectiveness | ✔️ |
-| Hypoglycemia-01 | Percentage of EMS responses from a 911 request for symptomatic hypoglycemia patients who receive treatment to correct hypoglycemia. | Process | Clinical Process – Effectiveness | ✔️ |
-| Respiratory-01 | Percentage of EMS responses from a 911 request for respiratory distress patients with a respiratory assessment. | Process | Clinical Process – Effectiveness | ✔️ |
-| Respiratory-02 | Percentage of EMS responses from a 911 request for patients with hypoxia receiving oxygen. | Process | Clinical Process – Effectiveness | ✔️ |
-| Pediatrics-03b | Percentage of EMS responses from a 911 request for patients \<18 years receiving a weight-based medication with documented weight in kg or length-based estimate. | Process | Patient Safety | ✔️ |
-| Safety-01 | Percentage of EMS responses from a 911 request without lights and sirens. | Process | Patient Safety | ✔️ |
-| Safety-02 | Percentage of EMS transports from a 911 request without lights and sirens during patient transport. | Process | Patient Safety | ✔️ |
-| Safety-04 | Percentage of EMS transports from a 911 or interfacility request for patients \<8 years transported with a pediatric restraint device. | Process | Patient Safety | ✔️ |
-| Seizure-02 | Percentage of EMS responses from a 911 request for patients with status epilepticus who received benzodiazepine. | Process | Clinical Process – Effectiveness | ✔️ |
-| Stroke-01 | Percentage of EMS responses from a 911 request for suspected stroke patients who had a stroke assessment. | Process | Clinical Process – Effectiveness | :heavy_check_mark: |
-| Syncope-01 | Percentage of EMS responses from a 911 request for syncope patients with a 12-lead (or greater) ECG performed. | Process | Clinical Process – Effectiveness | ✔️ |
-| TBI-01 | Percentage of EMS transports from a 911 request for suspected TBI patients with documented oxygen level, ETCO2, and systolic BP. | Process | Clinical Process – Effectiveness | ✔️ |
-| Trauma-01 | Percentage of EMS responses from a 911 request for injury patients assessed for pain. | Process | Patient Experience | :heavy_check_mark: |
-| Trauma-03 | Percentage of EMS transports from a 911 request for patients whose pain score decreased during EMS encounter. | Outcome | Patient Experience | :heavy_check_mark: |
-| Trauma-04 | Percentage of EMS responses from a 911 request for patients meeting CDC trauma criteria transported to a trauma center. | Process | Clinical Process – Effectiveness | ✔️ |
-| Trauma-08 | Percentage of EMS transports from a 911 request for trauma patients with documented GCS, systolic BP, and respiratory rate. | Process | Clinical Process – Effectiveness | ✔️ |
-| Trauma-14 | Percentage of EMS transports from a 911 request for patients meeting Step 1 or Step 2 field triage criteria with a pre-arrival trauma alert. | Process | Clinical Process – Effectiveness | :heavy_check_mark: |
-| TTR-01 | Percentage of EMS responses from a 911 request for non-transported patients with documented vital signs. | Process | Clinical Process – Effectiveness | ✔️ |
-
-------------------------------------------------------------------------
+| Measure ID | Description | Type | National Quality Strategy Domain | Developed in Package? |
+|:---|:---|:---|:---|:---|
+| Airway-01 | Percentage of EMS responses from a 911 request with successful advanced airway placement on first attempt without hypotension or hypoxia in peri-intubation period. | Outcome | Clinical Process – Effectiveness | ✔ |
+| Airway-05 | Percentage of intubation procedures from a 911 request in which adequate patient oxygen levels were achieved prior to intubation. | Process | Patient Safety | ✔ |
+| Airway-18 | Percentage of successful advanced airway procedures from a 911 request in which waveform capnography is used for confirmation and monitoring. | Process | Clinical Process – Effectiveness | ✔ |
+| Asthma-01 | Percentage of EMS responses from a 911 request for asthma patients receiving an aerosolized beta agonist. | Process | Clinical Process – Effectiveness | ✔ |
+| Hypoglycemia-01 | Percentage of EMS responses from a 911 request for symptomatic hypoglycemia patients who receive treatment to correct hypoglycemia. | Process | Clinical Process – Effectiveness | ✔ |
+| Respiratory-01 | Percentage of EMS responses from a 911 request for respiratory distress patients with a respiratory assessment. | Process | Clinical Process – Effectiveness | ✔ |
+| Respiratory-02 | Percentage of EMS responses from a 911 request for patients with hypoxia receiving oxygen. | Process | Clinical Process – Effectiveness | ✔ |
+| Pediatrics-03b | Percentage of EMS responses from a 911 request for patients \<18 years receiving a weight-based medication with documented weight in kg or length-based estimate. | Process | Patient Safety | ✔ |
+| Safety-01 | Percentage of EMS responses from a 911 request without lights and sirens. | Process | Patient Safety | ✔ |
+| Safety-02 | Percentage of EMS transports from a 911 request without lights and sirens during patient transport. | Process | Patient Safety | ✔ |
+| Safety-04 | Percentage of EMS transports from a 911 or interfacility request for patients \<8 years transported with a pediatric restraint device. | Process | Patient Safety | ✔ |
+| Seizure-02 | Percentage of EMS responses from a 911 request for patients with status epilepticus who received benzodiazepine. | Process | Clinical Process – Effectiveness | ✔ |
+| Stroke-01 | Percentage of EMS responses from a 911 request for suspected stroke patients who had a stroke assessment. | Process | Clinical Process – Effectiveness | ✔ |
+| Syncope-01 | Percentage of EMS responses from a 911 request for syncope patients with a 12-lead (or greater) ECG performed. | Process | Clinical Process – Effectiveness | ✔ |
+| TBI-01 | Percentage of EMS transports from a 911 request for suspected TBI patients with documented oxygen level, ETCO2, and systolic BP. | Process | Clinical Process – Effectiveness | ✔ |
+| Trauma-01 | Percentage of EMS responses from a 911 request for injury patients assessed for pain. | Process | Patient Experience | ✔ |
+| Trauma-03 | Percentage of EMS transports from a 911 request for patients whose pain score decreased during EMS encounter. | Outcome | Patient Experience | ✔ |
+| Trauma-04 | Percentage of EMS responses from a 911 request for patients meeting CDC trauma criteria transported to a trauma center. | Process | Clinical Process – Effectiveness | ✔ |
+| Trauma-08 | Percentage of EMS transports from a 911 request for trauma patients with documented GCS, systolic BP, and respiratory rate. | Process | Clinical Process – Effectiveness | ✔ |
+| Trauma-14 | Percentage of EMS transports from a 911 request for patients meeting Step 1 or Step 2 field triage criteria with a pre-arrival trauma alert. | Process | Clinical Process – Effectiveness | ✔ |
+| TTR-01 | Percentage of EMS responses from a 911 request for non-transported patients with documented vital signs. | Process | Clinical Process – Effectiveness | ✔ |
 
 # Resources
 
