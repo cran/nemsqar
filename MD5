@@ -1,7 +1,7 @@
-a2f53e13a8bdca801baed703ed207f06 *DESCRIPTION
+9d47f831cdc101dbec97a8eb366fb226 *DESCRIPTION
 351ee27f50c415f678938c31631d85cd *LICENSE
 5c0c03cdfc49af8915609ee438e5b8ba *NAMESPACE
-b5262260224fa1128f9521adcab01801 *NEWS.md
+d1246f39d2dde5372ba1e3e6f4c8a5c6 *NEWS.md
 477802a1aec130c947ef16615c474a79 *R/airway_01.R
 9fa02350ba76e4ed90a6449757a35820 *R/airway_01_population.R
 cf925e19bbb31ad3ec9d1df7e421ea0b *R/airway_05.R
@@ -14,7 +14,7 @@ fbeb92af72e2fc283425fcdbdab7ba14 *R/asthma_01_population.R
 99cc5b4b66d4a855541394dd0022a122 *R/hypoglycemia_01.R
 62447894299574d0eddb39f2a4cc11a1 *R/hypoglycemia_01_population.R
 754e065247c6c0636c3fe8440af3bfc9 *R/import-standalone-purrr.R
-f714d5e04659489ac3788b6b05922043 *R/nemsqa_binomial_confint.R
+e476e6244f2653a3bea3d1fd466dd678 *R/nemsqa_binomial_confint.R
 ff35c8598de9371aca9a0e14a789f65e *R/nemsqar-package.R
 63706ca727393dc4485a70d7befab632 *R/nemsqar_airway_table.R
 1ae79cd46935f3133712bb51376a9433 *R/nemsqar_arrest_table.R
@@ -63,6 +63,7 @@ e3ae05c47c231f5b6d316c2e24800cc8 *R/trauma_14_population.R
 9f11fb5f583a806307e1c7816bed036c *R/ttr_01.R
 29a691ca2b4f9926679e48db48b2937e *R/ttr_01_population.R
 5cbcd8a4115b69c5e76390c0f6958b12 *README.md
+9d40159f50a5fc9949cbfe95a2884126 *build/partial.rdb
 075f53959c12050436c9780eb8659b76 *data/nemsqar_airway_table.rda
 9697659fe3b29925f9314307f4d3455e *data/nemsqar_arrest_table.rda
 c86981681a155d4c1a86a2fecaf59271 *data/nemsqar_disposition_table.rda
@@ -90,7 +91,7 @@ a0fee58b778b608eb7197b12083e6921 *man/figures/logo.png
 d96eff9594107dddced369316045969b *man/figures/nemsqar_final.png
 caedbce933fea66770ec9c10d37731a1 *man/hypoglycemia_01.Rd
 f2a2237916952605fe43ecd5a482dbe7 *man/hypoglycemia_01_population.Rd
-9279a49192b6ccaa95fcff21ed3435d9 *man/nemsqa_binomial_confint.Rd
+dac1077431215d806f15043cf39b149d *man/nemsqa_binomial_confint.Rd
 cd0550083eb16f3b352a68f0fdd73c40 *man/nemsqar-package.Rd
 e1ece084e737a65c0602f408f796ffae *man/nemsqar_airway_table.Rd
 a0eb04d92178c1754ae9c33b8d3fa2f1 *man/nemsqar_arrest_table.Rd

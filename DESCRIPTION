@@ -1,7 +1,7 @@
 Package: nemsqar
 Title: National Emergency Medical Service Quality Alliance Measure
         Calculations
-Version: 1.1.1
+Version: 1.1.2
 Authors@R: c(
     person("Nicolas", "Foss", , "nicolas.foss@hhs.iowa.gov", role = c("aut", "cre")),
     person("Samuel", "Kordik", , "samuel.kordik@utsouthwestern.edu", role = "aut",
@@ -33,11 +33,11 @@ LazyData: true
 LazyDataCompression: bzip2
 RoxygenNote: 7.3.2
 NeedsCompilation: no
-Packaged: 2025-07-16 22:19:37 UTC; nfoss0
+Packaged: 2025-07-21 14:33:13 UTC; nfoss0
 Author: Nicolas Foss [aut, cre],
   Samuel Kordik [aut] (ORCID: <https://orcid.org/0000-0003-4230-1154>),
   Alyssa Green [ctb],
   Iowa Department of Health and Human Services [cph]
 Maintainer: Nicolas Foss <nicolas.foss@hhs.iowa.gov>
 Repository: CRAN
-Date/Publication: 2025-07-16 22:50:02 UTC
+Date/Publication: 2025-07-21 15:40:03 UTC
