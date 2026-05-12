@@ -24,12 +24,13 @@ Useful links:
 
 Authors:
 \itemize{
+  \item Nicolas Foss \email{nicolas.foss@hhs.iowa.gov}
   \item Samuel Kordik \email{samuel.kordik@utsouthwestern.edu} (\href{https://orcid.org/0000-0003-4230-1154}{ORCID})
 }
 
 Other contributors:
 \itemize{
-  \item Alyssa Green \email{awhim@nemsqa.org} [contributor]
+  \item Alyssa Green \email{agreen@nemsqa.org} [contributor]
   \item Iowa Department of Health and Human Services [copyright holder]
 }
 

@@ -3,8 +3,6 @@
 #'
 #' @description
 #'
-#' `r lifecycle::badge("experimental")`
-#'
 #' Computes confidence intervals for binomial proportions using either the
 #' Wilson or Clopper-Pearson method. This function supports vectorized
 #' operations and allows optional correction for continuity. The Wilson interval
@@ -77,27 +75,28 @@ nemsqa_binomial_confint <- function(
   conf.level = 0.95,
   correct = TRUE
 ) {
-  # confidence interval function for the nemsqar package
+  # confidence interval function for the nemsqar package ----
   # Set default method and adjustment method
   method <- match.arg(method, choices = c("wilson", "clopper-pearson"))
 
-  # If the user passes a tibble or data.frame
+  # If the user passes a tibble or data.frame ----
   if (!is.null(data)) {
-    x <- data |> dplyr::pull({{ x }})
-    n <- data |> dplyr::pull({{ n }})
+    # Validate that columns exist in `data` and can be vectorized
+    x <- validate_data_pull(input = data, col = {{ x }}, type = "error")
+    n <- validate_data_pull(input = data, col = {{ n }}, type = "error")
   }
 
-  # Initialize lower and upper CI bounds
+  # Initialize lower and upper CI bounds ----
   lower <- numeric()
   upper <- numeric()
 
-  # Initialize the calculated proportion
+  # Initialize the calculated proportion ----
   estimate <- numeric()
 
-  # Vectorized Wilson Interval
+  # Vectorized Wilson Interval ----
   # Based on Wilson, E. B. (1927)
   if (method == "wilson") {
-    # Create a vectorized version of the function for computing confidence intervals
+    # Create a vectorized version of the function for computing confidence intervals ----
     # for each pair of (x, n) values using prop.test().
     # Vectorize() makes the function work element-wise over vectors of x and n
     # Define an anonymous function here
@@ -122,20 +121,20 @@ nemsqa_binomial_confint <- function(
       vectorize.args = c("x", "n")
     ) # Specify the arguments to be vectorized
 
-    # Call the vectorized function on the x and n values
+    # Call the vectorized function on the x and n values ----
     ci_result <- ci(x, n) # Apply the vectorized function to the vectors of x and n
 
-    # Extract the lower confidence interval (CI) values from the result matrix
+    # Extract the lower confidence interval (CI) values from the result matrix ----
     lower <- ci_result[1, ] # First row contains lower CIs
 
-    # Extract the upper confidence interval (CI) values from the result matrix
+    # Extract the upper confidence interval (CI) values from the result matrix ----
     upper <- ci_result[2, ] # Second row contains upper CIs
 
-    # Extract the estimate from the result matrix
+    # Extract the estimate from the result matrix ----
     estimate <- ci_result[3, ] # Third row contains the estimates
   }
 
-  # Vectorized Clopper-Pearson Interval
+  # Vectorized Clopper-Pearson Interval ----
   # Based on Clopper, C. & Pearson, E. S. (1934)
   if (method == "clopper-pearson") {
     # Create a vectorized version of the function for computing confidence intervals
@@ -148,7 +147,7 @@ nemsqa_binomial_confint <- function(
           return(c(NaN, NaN, NaN)) # Return NaN if n == 0 for lower and upper CIs and the estimate
         }
 
-        # Calculate the confidence interval for the proportion using the Clopper-Pearson method
+        # Calculate the confidence interval for the proportion using the Clopper-Pearson method ----
         # calculate the estimate (proportion) as well
         result <- binom.test(x, n, conf.level = conf.level)
 
@@ -158,20 +157,20 @@ nemsqa_binomial_confint <- function(
       vectorize.args = c("x", "n")
     ) # Specify the arguments to be vectorized
 
-    # Call the vectorized function on the x and n values
+    # Call the vectorized function on the x and n values ----
     ci_result <- ci(x, n) # Apply the vectorized function to the vectors of x and n
 
-    # Extract the lower confidence interval (CI) values from the result matrix
+    # Extract the lower confidence interval (CI) values from the result matrix ----
     lower <- ci_result[1, ] # First row contains lower CIs
 
-    # Extract the upper confidence interval (CI) values from the result matrix
+    # Extract the upper confidence interval (CI) values from the result matrix ----
     upper <- ci_result[2, ] # Second row contains upper CIs
 
-    # Extract the estimate from the result matrix
+    # Extract the estimate from the result matrix ----
     estimate <- ci_result[3, ] # Third row contains the estimates
   }
 
-  # Return as a dataframe/tibble-compatible structure
+  # Return as a dataframe/tibble-compatible structure ----
   lower_upper <- tibble::tibble(
     prop = estimate,
     lower_ci = lower,
@@ -186,7 +185,7 @@ nemsqa_binomial_confint <- function(
       .after = prop
     )
 
-  # Elegant output with data.frame input or
+  # Elegant output with data.frame input or ----
   # in another workflow like dplyr::mutate()
   if (!is.null(data)) {
     return(dplyr::bind_cols(data, lower_upper))

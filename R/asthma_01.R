@@ -10,49 +10,9 @@
 #' the data by age into adult and pediatric populations, computing the
 #' proportion of cases that received beta-agonist treatment.
 #'
-#' @param df A data.frame or tibble containing EMS data. Default is `NULL`.
-#' @param patient_scene_table A data.frame or tibble containing at least
-#'   ePatient and eScene fields as a fact table. Default is `NULL`.
-#' @param response_table A data.frame or tibble containing at least the
-#'   eResponse fields needed for this measure's calculations. Default is `NULL`.
-#' @param situation_table A data.frame or tibble containing at least the
-#'   eSituation fields needed for this measure's calculations. Default is
-#'   `NULL`.
-#' @param medications_table A data.frame or tibble containing at least the
-#'   eMedications fields needed for this measure's calculations. Default is
-#'   `NULL`.
-#' @param erecord_01_col The column representing the EMS record unique
-#'   identifier. Default is `NULL`.
-#' @param incident_date_col Column that contains the incident date. This
-#'   defaults to `NULL` as it is optional in case not available due to PII
-#'   restrictions.
-#' @param patient_DOB_col Column that contains the patient's date of birth. This
-#'   defaults to `NULL` as it is optional in case not available due to PII
-#'   restrictions.
-#' @param epatient_15_col Column representing the patient's numeric age agnostic
-#'   of unit.
-#' @param epatient_16_col Column representing the patient's age unit ("Years",
-#'   "Months", "Days", "Hours", or "Minute").
-#' @param eresponse_05_col Column that contains eResponse.05.
-#' @param esituation_11_col Column that contains eSituation.11.
-#' @param esituation_12_col Column that contains all eSituation.12 values as a
-#'   single comma-separated list.
-#' @param emedications_03_col Column that contains all eMedications.03 values as
-#'   a single comma-separated list.
-#' @param confidence_interval `r lifecycle::badge("experimental")` Logical. If
-#'   `TRUE`, the function calculates a confidence interval for the proportion
-#'   estimate.
-#' @param method `r lifecycle::badge("experimental")`Character. Specifies the
-#'   method used to calculate confidence intervals. Options are `"wilson"`
-#'   (Wilson score interval) and `"clopper-pearson"` (exact binomial interval).
-#'   Partial matching is supported, so `"w"` and `"c"` can be used as shorthand.
-#' @param conf.level `r lifecycle::badge("experimental")`Numeric. The confidence
-#'   level for the interval, expressed as a proportion (e.g., 0.95 for a 95%
-#'   confidence interval). Defaults to 0.95.
-#' @param correct `r lifecycle::badge("experimental")`Logical. If `TRUE`,
-#'   applies a continuity correction to the Wilson score interval when `method =
-#'   "wilson"`. Defaults to `TRUE`.
-#' @param ... optional additional arguments to pass onto `dplyr::summarize`.
+#' @inheritParams airway_01_population
+#' @inheritParams asthma_01_population
+#' @inheritParams airway_01
 #'
 #' @return A data.frame summarizing results for two population groups (All,
 #'   Adults and Peds) with the following columns:
@@ -87,6 +47,8 @@
 #' asthma_01(
 #'   df = test_data,
 #'   erecord_01_col = erecord_01,
+#'   incident_date_col = NULL,
+#'   patient_DOB_col = NULL,
 #'   epatient_15_col = epatient_15,
 #'   epatient_16_col = epatient_16,
 #'   eresponse_05_col = eresponse_05,
@@ -100,199 +62,268 @@
 #'
 #' @export
 #'
-asthma_01 <- function(df = NULL,
-                      patient_scene_table = NULL,
-                      response_table = NULL,
-                      situation_table = NULL,
-                      medications_table = NULL,
-                      erecord_01_col,
-                      incident_date_col = NULL,
-                      patient_DOB_col = NULL,
-                      epatient_15_col,
-                      epatient_16_col,
-                      eresponse_05_col,
-                      esituation_11_col,
-                      esituation_12_col,
-                      emedications_03_col,
-                      confidence_interval = FALSE,
-                      method = c("wilson", "clopper-pearson"),
-                      conf.level = 0.95,
-                      correct = TRUE,
-                      ...) {
-
-  # Set default method and adjustment method
+asthma_01 <- function(
+  df = NULL,
+  patient_scene_table = NULL,
+  response_table = NULL,
+  situation_table = NULL,
+  medications_table = NULL,
+  erecord_01_col,
+  incident_date_col = NULL,
+  patient_DOB_col = NULL,
+  epatient_15_col,
+  epatient_16_col,
+  eresponse_05_col,
+  esituation_11_col,
+  esituation_12_col,
+  emedications_03_col,
+  confidence_interval = FALSE,
+  method = c("wilson", "clopper-pearson"),
+  conf.level = 0.95,
+  correct = TRUE,
+  ...
+) {
+  # Set default method and adjustment method ----
   method <- match.arg(method, choices = c("wilson", "clopper-pearson"))
 
-  # utilize applicable tables to analyze the data for the measure
-  if(
-    all(!is.null(patient_scene_table),
-        !is.null(response_table),
-        !is.null(situation_table),
-        !is.null(medications_table)
-    ) && is.null(df)
+  # ensure that not all table arguments AND the df argument are fulfilled ----
+  # user only passes df or all table arguments
 
+  if (
+    any(
+      !is.null(patient_scene_table),
+      !is.null(response_table),
+      !is.null(situation_table),
+      !is.null(medications_table)
+    ) &&
+
+      !is.null(df)
   ) {
-
-    # Start timing the function execution
-    start_time <- Sys.time()
-
-    # header
-    cli::cli_h1("Asthma-01")
-
-    # header
-    cli::cli_h2("Gathering Records for Asthma-01")
-
-    # gather the population of interest
-    asthma_01_populations <- asthma_01_population(patient_scene_table = patient_scene_table,
-                                                  response_table = response_table,
-                                                  situation_table = situation_table,
-                                                  medications_table = medications_table,
-                                                  erecord_01_col = {{ erecord_01_col }},
-                                                  incident_date_col = {{ incident_date_col }},
-                                                  patient_DOB_col = {{ patient_DOB_col }},
-                                                  epatient_15_col = {{ epatient_15_col }},
-                                                  epatient_16_col = {{ epatient_16_col }},
-                                                  eresponse_05_col = {{ eresponse_05_col }},
-                                                  esituation_11_col = {{ esituation_11_col }},
-                                                  esituation_12_col = {{ esituation_12_col }},
-                                                  emedications_03_col = {{ emedications_03_col }}
-                                                  )
-
-    # create a separator
-    cli::cli_text("\n")
-
-    # header for calculations
-    cli::cli_h2("Calculating Asthma-01")
-
-    # summary
-    asthma.01 <- results_summarize(total_population = asthma_01_populations$initial_population,
-                                   adult_population = asthma_01_populations$adults,
-                                   peds_population = asthma_01_populations$peds,
-                                   measure_name = "Asthma-01",
-                                   numerator_col = beta_agonist_check,
-                                   confidence_interval = confidence_interval,
-                                   method = method,
-                                   conf.level = conf.level,
-                                   correct = correct,
-                                   ...)
-
-    # create a separator
-    cli::cli_text("\n")
-
-    # Calculate and display the runtime
-    end_time <- Sys.time()
-    run_time_secs <- difftime(end_time, start_time, units = "secs")
-    run_time_secs <- as.numeric(run_time_secs)
-
-    if (run_time_secs >= 60) {
-
-      run_time <- round(run_time_secs / 60, 2)  # Convert to minutes and round
-      cli::cli_alert_success("Function completed in {cli::col_green(paste0(run_time, 'm'))}.")
-
-    } else {
-
-      run_time <- round(run_time_secs, 2)  # Keep in seconds and round
-      cli::cli_alert_success("Function completed in {cli::col_green(paste0(run_time, 's'))}.")
-
-    }
-
-    # create a separator
-    cli::cli_text("\n")
-
-    # when confidence interval is "wilson", check for n < 10
-    # to warn about incorrect Chi-squared approximation
-    if (any(asthma.01$denominator < 10) && method == "wilson" && confidence_interval) {
-
-      cli::cli_warn("In {.fn prop.test}: Chi-squared approximation may be incorrect for any n < 10.")
-
-    }
-
-
-    return(asthma.01)
-
-  } else if(all(is.null(patient_scene_table), is.null(response_table), is.null(situation_table), is.null(medications_table)) && !is.null(df))
-
-    # utilize a dataframe to analyze the data for the measure analytics
-
-  {
-
-    # Start timing the function execution
-    start_time <- Sys.time()
-
-    # header
-    cli::cli_h1("Asthma-01")
-
-    # header
-    cli::cli_h2("Gathering Records for Asthma-01")
-
-    # gather the population of interest
-    asthma_01_populations <- asthma_01_population(df = df,
-                                                  patient_scene_table = patient_scene_table,
-                                                  response_table = response_table,
-                                                  situation_table = situation_table,
-                                                  medications_table = medications_table,
-                                                  erecord_01_col = {{ erecord_01_col }},
-                                                  incident_date_col = {{ incident_date_col }},
-                                                  patient_DOB_col = {{ patient_DOB_col }},
-                                                  epatient_15_col = {{ epatient_15_col }},
-                                                  epatient_16_col = {{ epatient_16_col }},
-                                                  eresponse_05_col = {{ eresponse_05_col }},
-                                                  esituation_11_col = {{ esituation_11_col }},
-                                                  esituation_12_col = {{ esituation_12_col }},
-                                                  emedications_03_col = {{ emedications_03_col }}
-                                                  )
-
-    # create a separator
-    cli::cli_text("\n")
-
-    # header for calculations
-    cli::cli_h2("Calculating Asthma-01")
-
-    # summary
-    asthma.01 <- results_summarize(total_population = asthma_01_populations$initial_population,
-                                   adult_population = asthma_01_populations$adults,
-                                   peds_population = asthma_01_populations$peds,
-                                   measure_name = "Asthma-01",
-                                   numerator_col = beta_agonist_check,
-                                   confidence_interval = confidence_interval,
-                                   method = method,
-                                   conf.level = conf.level,
-                                   correct = correct,
-                                   ...)
-
-    # create a separator
-    cli::cli_text("\n")
-
-    # Calculate and display the runtime
-    end_time <- Sys.time()
-    run_time_secs <- difftime(end_time, start_time, units = "secs")
-    run_time_secs <- as.numeric(run_time_secs)
-
-    if (run_time_secs >= 60) {
-
-      run_time <- round(run_time_secs / 60, 2)  # Convert to minutes and round
-      cli::cli_alert_success("Function completed in {cli::col_green(paste0(run_time, 'm'))}.")
-
-    } else {
-
-      run_time <- round(run_time_secs, 2)  # Keep in seconds and round
-      cli::cli_alert_success("Function completed in {cli::col_green(paste0(run_time, 's'))}.")
-
-    }
-
-    # create a separator
-    cli::cli_text("\n")
-
-    # when confidence interval is "wilson", check for n < 10
-    # to warn about incorrect Chi-squared approximation
-    if (any(asthma.01$denominator < 10) && method == "wilson" && confidence_interval) {
-
-      cli::cli_warn("In {.fn prop.test}: Chi-squared approximation may be incorrect for any n < 10.")
-
-    }
-
-    return(asthma.01)
-
+    cli::cli_abort(
+      "{.fn asthma_01} will only work by passing a {.cls data.frame} or {.cls tibble} to the {.var df} argument, or by fulfilling all table arguments.  Please choose to either pass an object of class {.cls data.frame} or {.cls tibble} to the {.var df} argument, or fulfill all table arguments."
+    )
   }
 
+  # ensure that df or all table arguments are fulfilled ----
+
+  if (
+    all(
+      is.null(patient_scene_table),
+      is.null(response_table),
+      is.null(situation_table),
+      is.null(medications_table)
+    ) &&
+      is.null(df)
+  ) {
+    cli::cli_abort(
+      "{.fn asthma_01} will only work by passing a {.cls data.frame} or {.cls tibble} to the {.var df} argument, or by fulfilling all table arguments.  Please choose to either pass an object of class {.cls data.frame} or {.cls tibble} to the {.var df} argument, or fulfill all table arguments."
+    )
+  }
+
+  # ensure all *_col arguments are fulfilled ----
+  if (
+    any(
+      missing(erecord_01_col),
+      missing(incident_date_col),
+      missing(patient_DOB_col),
+      missing(epatient_15_col),
+      missing(epatient_16_col),
+      missing(eresponse_05_col),
+      missing(esituation_11_col),
+      missing(esituation_12_col),
+      missing(emedications_03_col)
+    )
+  ) {
+    cli::cli_abort(
+      "One or more of the *_col arguments is missing.  Please make sure you pass an unquoted column to each of the *_col arguments to run {.fn asthma_01}."
+    )
+  }
+
+  # utilize applicable tables to analyze the data for the measure ----
+  if (
+    all(
+      !is.null(patient_scene_table),
+      !is.null(response_table),
+      !is.null(situation_table),
+      !is.null(medications_table)
+    ) &&
+      is.null(df)
+  ) {
+    # Start timing the function execution ----
+    start_time <- Sys.time()
+
+    # header ----
+    cli::cli_h1("Asthma-01")
+
+    # header ----
+    cli::cli_h2("Gathering Records for Asthma-01")
+
+    # gather the population of interest ----
+    asthma_01_populations <- asthma_01_population(
+      patient_scene_table = patient_scene_table,
+      response_table = response_table,
+      situation_table = situation_table,
+      medications_table = medications_table,
+      erecord_01_col = {{ erecord_01_col }},
+      incident_date_col = {{ incident_date_col }},
+      patient_DOB_col = {{ patient_DOB_col }},
+      epatient_15_col = {{ epatient_15_col }},
+      epatient_16_col = {{ epatient_16_col }},
+      eresponse_05_col = {{ eresponse_05_col }},
+      esituation_11_col = {{ esituation_11_col }},
+      esituation_12_col = {{ esituation_12_col }},
+      emedications_03_col = {{ emedications_03_col }}
+    )
+
+    # create a separator ----
+    cli::cli_text("\n")
+
+    # header for calculations ----
+    cli::cli_h2("Calculating Asthma-01")
+
+    # summary ----
+    asthma.01 <- results_summarize(
+      total_population = asthma_01_populations$initial_population,
+      adult_population = asthma_01_populations$adults,
+      peds_population = asthma_01_populations$peds,
+      measure_name = "Asthma-01",
+      numerator_col = beta_agonist_check,
+      confidence_interval = confidence_interval,
+      method = method,
+      conf.level = conf.level,
+      correct = correct,
+      ...
+    )
+
+    # create a separator ----
+    cli::cli_text("\n")
+
+    # Calculate and display the runtime ----
+    end_time <- Sys.time()
+    run_time_secs <- difftime(end_time, start_time, units = "secs")
+    run_time_secs <- as.numeric(run_time_secs)
+
+    if (run_time_secs >= 60) {
+      run_time <- round(run_time_secs / 60, 2) # Convert to minutes and round
+      cli::cli_alert_success(
+        "Function completed in {cli::col_green(paste0(run_time, 'm'))}."
+      )
+    } else {
+      run_time <- round(run_time_secs, 2) # Keep in seconds and round
+      cli::cli_alert_success(
+        "Function completed in {cli::col_green(paste0(run_time, 's'))}."
+      )
+    }
+
+    # create a separator ----
+    cli::cli_text("\n")
+
+    # when confidence interval is "wilson", check for n < 10 ----
+    # to warn about incorrect Chi-squared approximation
+    if (
+      any(asthma.01$denominator < 10) &&
+        method == "wilson" &&
+        confidence_interval
+    ) {
+      cli::cli_warn(
+        "In {.fn prop.test}: Chi-squared approximation may be incorrect for any n < 10."
+      )
+    }
+
+    return(asthma.01)
+  } else if (
+    all(
+      is.null(patient_scene_table),
+      is.null(response_table),
+      is.null(situation_table),
+      is.null(medications_table)
+    ) &&
+      !is.null(df)
+  ) {
+    # utilize a dataframe to analyze the data for the measure analytics ----
+
+    # Start timing the function execution ----
+    start_time <- Sys.time()
+
+    # header ----
+    cli::cli_h1("Asthma-01")
+
+    # header ----
+    cli::cli_h2("Gathering Records for Asthma-01")
+
+    # gather the population of interest ----
+    asthma_01_populations <- asthma_01_population(
+      df = df,
+      patient_scene_table = patient_scene_table,
+      response_table = response_table,
+      situation_table = situation_table,
+      medications_table = medications_table,
+      erecord_01_col = {{ erecord_01_col }},
+      incident_date_col = {{ incident_date_col }},
+      patient_DOB_col = {{ patient_DOB_col }},
+      epatient_15_col = {{ epatient_15_col }},
+      epatient_16_col = {{ epatient_16_col }},
+      eresponse_05_col = {{ eresponse_05_col }},
+      esituation_11_col = {{ esituation_11_col }},
+      esituation_12_col = {{ esituation_12_col }},
+      emedications_03_col = {{ emedications_03_col }}
+    )
+
+    # create a separator ----
+    cli::cli_text("\n")
+
+    # header for calculations ----
+    cli::cli_h2("Calculating Asthma-01")
+
+    # summary ----
+    asthma.01 <- results_summarize(
+      total_population = asthma_01_populations$initial_population,
+      adult_population = asthma_01_populations$adults,
+      peds_population = asthma_01_populations$peds,
+      measure_name = "Asthma-01",
+      numerator_col = beta_agonist_check,
+      confidence_interval = confidence_interval,
+      method = method,
+      conf.level = conf.level,
+      correct = correct,
+      ...
+    )
+
+    # create a separator ----
+    cli::cli_text("\n")
+
+    # Calculate and display the runtime ----
+    end_time <- Sys.time()
+    run_time_secs <- difftime(end_time, start_time, units = "secs")
+    run_time_secs <- as.numeric(run_time_secs)
+
+    if (run_time_secs >= 60) {
+      run_time <- round(run_time_secs / 60, 2) # Convert to minutes and round
+      cli::cli_alert_success(
+        "Function completed in {cli::col_green(paste0(run_time, 'm'))}."
+      )
+    } else {
+      run_time <- round(run_time_secs, 2) # Keep in seconds and round
+      cli::cli_alert_success(
+        "Function completed in {cli::col_green(paste0(run_time, 's'))}."
+      )
+    }
+
+    # create a separator ----
+    cli::cli_text("\n")
+
+    # when confidence interval is "wilson", check for n < 10 ----
+    # to warn about incorrect Chi-squared approximation
+    if (
+      any(asthma.01$denominator < 10) &&
+        method == "wilson" &&
+        confidence_interval
+    ) {
+      cli::cli_warn(
+        "In {.fn prop.test}: Chi-squared approximation may be incorrect for any n < 10."
+      )
+    }
+
+    return(asthma.01)
+  }
 }

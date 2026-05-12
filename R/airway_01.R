@@ -5,60 +5,17 @@
 #' Calculates the proportion of times when the first endotracheal intubation
 #' attempt is successful with no peri-intubation hypoxia or hypotension.
 #'
-#' @param df A dataframe or tibble containing EMS data where each row represents
-#'   an observation and columns represent features.
-#' @param patient_scene_table A data.frame or tibble containing at least
-#'   epatient, escene, and earrest.01 fields as a fact table.
-#' @param response_table A data.frame or tibble containing at least the
-#'   eresponse fields needed for this measure's calculations.
-#' @param arrest_table A data.frame or tibble containing at least the earrest
-#'   fields needed for this measure's calculations.
-#' @param procedures_table A dataframe or tibble containing at least the
-#'   eProcedures fields needed.
-#' @param vitals_table A dataframe or tibble containing at least the eVitals
-#'   fields needed.
-#' @param erecord_01_col The column representing the EMS record unique
-#'   identifier.
-#' @param incident_date_col Column that contains the incident date. This
-#'   defaults to `NULL` as it is optional in case not available due to PII
-#'   restrictions.
-#' @param patient_DOB_col Column that contains the patient's date of birth. This
-#'   defaults to `NULL` as it is optional in case not available due to PII
-#'   restrictions.
-#' @param epatient_15_col Column representing the patient's numeric age agnostic
-#'   of unit.
-#' @param epatient_16_col Column representing the patient's age unit ("Years",
-#'   "Months", "Days", "Hours", or "Minutes").
-#' @param eresponse_05_col Column that contains eResponse.05.
-#' @param earrest_01_col  Column representing whether or not the patient is in
-#'   arrest.
-#' @param evitals_01_col  Date-time or POSIXct column containing vital signs
-#'   date/time
-#' @param evitals_06_col  Numeric column containing systolic blood pressure
-#'   values
-#' @param evitals_12_col  Numeric column containing pulse oximetry values.
-#' @param eprocedures_01_col  Date-time or POSIXct column for procedures
-#' @param eprocedures_02_col Column name for whether or not the procedure was
-#'   performed prior to EMS care being provided.
-#' @param eprocedures_03_col  Column containing procedure codes with or without
-#'   procedure names.
-#' @param eprocedures_05_col  Column containing a count for how many times
-#'   procedure was attempted.
-#' @param eprocedures_06_col  Column indicating whether or not procedure was
-#'   successful.
-#' @param confidence_interval `r lifecycle::badge("experimental")` Logical. If
-#'   `TRUE`, the function calculates a confidence interval for the proportion
-#'   estimate.
-#' @param method `r lifecycle::badge("experimental")`Character. Specifies the
-#'   method used to calculate confidence intervals. Options are `"wilson"`
-#'   (Wilson score interval) and `"clopper-pearson"` (exact binomial interval).
-#'   Partial matching is supported, so `"w"` and `"c"` can be used as shorthand.
-#' @param conf.level `r lifecycle::badge("experimental")`Numeric. The confidence
-#'   level for the interval, expressed as a proportion (e.g., 0.95 for a 95%
-#'   confidence interval). Defaults to 0.95.
-#' @param correct `r lifecycle::badge("experimental")`Logical. If `TRUE`,
-#'   applies a continuity correction to the Wilson score interval when `method =
-#'   "wilson"`. Defaults to `TRUE`.
+#' @inheritParams airway_01_population
+#' @param confidence_interval Logical. If `TRUE`, the function calculates a
+#' confidence interval for the proportion estimate.
+#' @param method Character. Specifies the method used to calculate confidence
+#' intervals. Options are `"wilson"` (Wilson score interval) and
+#' `"clopper-pearson"` (exact binomial interval). Partial matching is supported,
+#' so `"w"` and `"c"` can be used as shorthand.
+#' @param conf.level Numeric. The confidence level for the interval, expressed
+#' as a proportion (e.g., 0.95 for a 95% confidence interval). Defaults to 0.95.
+#' @param correct Logical. If `TRUE`, applies a continuity correction to the
+#' Wilson score interval when `method = "wilson"`. Defaults to `TRUE`.
 #' @param ... optional additional arguments to pass onto `dplyr::summarize`.
 #'
 #' @return A data.frame summarizing results for two population groups (Adults
@@ -168,91 +125,152 @@
 #'
 #' @export
 #'
-airway_01 <- function(df = NULL,
-                      patient_scene_table = NULL,
-                      response_table = NULL,
-                      arrest_table = NULL,
-                      procedures_table = NULL,
-                      vitals_table = NULL,
-                      erecord_01_col,
-                      incident_date_col = NULL,
-                      patient_DOB_col = NULL,
-                      epatient_15_col,
-                      epatient_16_col,
-                      earrest_01_col,
-                      eresponse_05_col,
-                      evitals_01_col,
-                      evitals_06_col,
-                      evitals_12_col,
-                      eprocedures_01_col,
-                      eprocedures_02_col,
-                      eprocedures_03_col,
-                      eprocedures_05_col,
-                      eprocedures_06_col,
-                      confidence_interval = FALSE,
-                      method = c("wilson", "clopper-pearson"),
-                      conf.level = 0.95,
-                      correct = TRUE,
-                      ...) {
-
-  # Set default method and adjustment method
+airway_01 <- function(
+  df = NULL,
+  patient_scene_table = NULL,
+  response_table = NULL,
+  arrest_table = NULL,
+  procedures_table = NULL,
+  vitals_table = NULL,
+  erecord_01_col,
+  incident_date_col = NULL,
+  patient_DOB_col = NULL,
+  epatient_15_col,
+  epatient_16_col,
+  earrest_01_col,
+  eresponse_05_col,
+  evitals_01_col,
+  evitals_06_col,
+  evitals_12_col,
+  eprocedures_01_col,
+  eprocedures_02_col,
+  eprocedures_03_col,
+  eprocedures_05_col,
+  eprocedures_06_col,
+  confidence_interval = FALSE,
+  method = c("wilson", "clopper-pearson"),
+  conf.level = 0.95,
+  correct = TRUE,
+  ...
+) {
+  # Set default method and adjustment method ----
   method <- match.arg(method, choices = c("wilson", "clopper-pearson"))
 
-  # utilize applicable tables to analyze the data for the measure
-  if(
-    all(!is.null(patient_scene_table),
-        !is.null(response_table),
-        !is.null(arrest_table),
-        !is.null(procedures_table),
-        !is.null(vitals_table)
-    ) && is.null(df)
+  # Check for tables or DF ----
 
+  if (
+    any(
+      !is.null(patient_scene_table),
+      !is.null(response_table),
+      !is.null(arrest_table),
+      !is.null(procedures_table),
+      !is.null(vitals_table)
+    ) &&
+      !is.null(df)
   ) {
+    cli::cli_abort(
+      "{.fn airway_01} will only work by passing a {.cls data.frame} or {.cls tibble} to the {.var df} argument, or by fulfilling all four of the table arguments.  Please choose to either pass an object of class {.cls data.frame} or {.cls tibble} to the {.var df} argument, or fulfill all four table arguments."
+    )
+  }
 
-    # Start timing the function execution
+  # Ensure that df or all table arguments are fulfilled ----
+
+  if (
+    all(
+      is.null(patient_scene_table),
+      is.null(procedures_table),
+      is.null(vitals_table),
+      is.null(arrest_table),
+      is.null(response_table)
+    ) &&
+      is.null(df)
+  ) {
+    cli::cli_abort(
+      "{.fn airway_01} requires either a {.cls data.frame} or {.cls tibble} passed to the {.var df} argument, or all table arguments to be fulfilled. Please choose one approach."
+    )
+  }
+
+  # ensure all *_col arguments are fulfilled ----
+  if (
+    any(
+      missing(erecord_01_col),
+      missing(incident_date_col),
+      missing(patient_DOB_col),
+      missing(epatient_15_col),
+      missing(epatient_16_col),
+      missing(earrest_01_col),
+      missing(eresponse_05_col),
+      missing(evitals_01_col),
+      missing(evitals_06_col),
+      missing(evitals_12_col),
+      missing(eprocedures_01_col),
+      missing(eprocedures_02_col),
+      missing(eprocedures_03_col),
+      missing(eprocedures_05_col),
+      missing(eprocedures_06_col)
+    )
+  ) {
+    cli::cli_abort(
+      "One or more of the *_col arguments is missing.  Please make sure you pass an unquoted column to each of the *_col arguments to run {.fn airway_01}."
+    )
+  }
+
+  # utilize applicable tables to analyze the data for the measure ----
+  if (
+    all(
+      !is.null(patient_scene_table),
+      !is.null(response_table),
+      !is.null(arrest_table),
+      !is.null(procedures_table),
+      !is.null(vitals_table)
+    ) &&
+      is.null(df)
+  ) {
+    # Start timing the function execution ----
     start_time <- Sys.time()
 
-    # header
+    # header ----
     cli::cli_h1("Airway-01")
 
-    # header
+    # header ----
     cli::cli_h2("Gathering Records for Airway-01")
 
-  #############################################################################
-  #                                                                           #
-  #     Get Population Level Information from tables and columns              #
-  #                                                                           #
-  #############################################################################
+    #############################################################################
+    #                                                                           #
+    #     Get Population Level Information from tables and columns ----         #
+    #                                                                           #
+    #############################################################################
 
-  airway_01_population <- airway_01_population(patient_scene_table = patient_scene_table,
-                                               response_table = response_table,
-                                               arrest_table = arrest_table,
-                                               procedures_table = procedures_table,
-                                               vitals_table = vitals_table,
-                                               erecord_01_col = {{ erecord_01_col }},
-                                               incident_date_col = {{ incident_date_col }},
-                                               patient_DOB_col = {{ patient_DOB_col }},
-                                               epatient_15_col = {{ epatient_15_col }},
-                                               epatient_16_col = {{ epatient_16_col }},
-                                               earrest_01_col = {{ earrest_01_col }},
-                                               eresponse_05_col = {{ eresponse_05_col }},
-                                               evitals_01_col = {{ evitals_01_col }},
-                                               evitals_06_col = {{ evitals_06_col }},
-                                               evitals_12_col = {{ evitals_12_col }},
-                                               eprocedures_01_col = {{ eprocedures_01_col }},
-                                               eprocedures_02_col = {{ eprocedures_02_col }},
-                                               eprocedures_03_col = {{ eprocedures_03_col }},
-                                               eprocedures_05_col = {{ eprocedures_05_col }},
-                                               eprocedures_06_col = {{ eprocedures_06_col }}
-                                               )
+    airway_01_population <- airway_01_population(
+      patient_scene_table = patient_scene_table,
+      response_table = response_table,
+      arrest_table = arrest_table,
+      procedures_table = procedures_table,
+      vitals_table = vitals_table,
+      erecord_01_col = {{ erecord_01_col }},
+      incident_date_col = {{ incident_date_col }},
+      patient_DOB_col = {{ patient_DOB_col }},
+      epatient_15_col = {{ epatient_15_col }},
+      epatient_16_col = {{ epatient_16_col }},
+      earrest_01_col = {{ earrest_01_col }},
+      eresponse_05_col = {{ eresponse_05_col }},
+      evitals_01_col = {{ evitals_01_col }},
+      evitals_06_col = {{ evitals_06_col }},
+      evitals_12_col = {{ evitals_12_col }},
+      eprocedures_01_col = {{ eprocedures_01_col }},
+      eprocedures_02_col = {{ eprocedures_02_col }},
+      eprocedures_03_col = {{ eprocedures_03_col }},
+      eprocedures_05_col = {{ eprocedures_05_col }},
+      eprocedures_06_col = {{ eprocedures_06_col }}
+    )
 
-    # create a separator
+    # create a separator ----
     cli::cli_text("\n")
 
-    # header for calculations
+    # header for calculations ----
     cli::cli_h2("Calculating Airway-01")
 
-    # summary
+    # summary ----
     airway.01 <- results_summarize(
       total_population = NULL,
       adult_population = airway_01_population$adults,
@@ -267,137 +285,141 @@ airway_01 <- function(df = NULL,
       ...
     )
 
-    # create a separator
+    # create a separator ----
     cli::cli_text("\n")
 
-    # Calculate and display the runtime
+    # Calculate and display the runtime ----
     end_time <- Sys.time()
     run_time_secs <- difftime(end_time, start_time, units = "secs")
     run_time_secs <- as.numeric(run_time_secs)
 
     if (run_time_secs >= 60) {
-
-      run_time <- round(run_time_secs / 60, 2)  # Convert to minutes and round
-      cli::cli_alert_success("Function completed in {cli::col_green(paste0(run_time, 'm'))}.")
-
+      run_time <- round(run_time_secs / 60, 2) # Convert to minutes and round
+      cli::cli_alert_success(
+        "Function completed in {cli::col_green(paste0(run_time, 'm'))}."
+      )
     } else {
-
-      run_time <- round(run_time_secs, 2)  # Keep in seconds and round
-      cli::cli_alert_success("Function completed in {cli::col_green(paste0(run_time, 's'))}.")
-
+      run_time <- round(run_time_secs, 2) # Keep in seconds and round
+      cli::cli_alert_success(
+        "Function completed in {cli::col_green(paste0(run_time, 's'))}."
+      )
     }
 
-    # create a separator
+    # create a separator ----
     cli::cli_text("\n")
 
-    # when confidence interval is "wilson", check for n < 10
+    # when confidence interval is "wilson", check for n < 10 ----
     # to warn about incorrect Chi-squared approximation
-    if (any(airway.01$denominator < 10) && method == "wilson" && confidence_interval) {
-
-      cli::cli_warn("In {.fn prop.test}: Chi-squared approximation may be incorrect for any n < 10.")
-
+    if (
+      any(airway.01$denominator < 10) &&
+        method == "wilson" &&
+        confidence_interval
+    ) {
+      cli::cli_warn(
+        "In {.fn prop.test}: Chi-squared approximation may be incorrect for any n < 10."
+      )
     }
-
 
     return(airway.01)
+  } else if (
+    all(
+      is.null(patient_scene_table),
+      is.null(response_table),
+      is.null(arrest_table),
+      is.null(procedures_table),
+      is.null(vitals_table)
+    ) &&
+      !is.null(df)
+  ) {
+    # Start timing the function execution ----
+    start_time <- Sys.time()
 
-    } else if(
-      all(is.null(patient_scene_table),
-          is.null(response_table),
-          is.null(arrest_table),
-          is.null(procedures_table),
-          is.null(vitals_table)
-      ) && !is.null(df)
+    # header ----
+    cli::cli_h1("Airway-01")
 
-    ) {
+    # header ----
+    cli::cli_h2("Gathering Records for Airway-01")
 
-      # Start timing the function execution
-      start_time <- Sys.time()
+    #############################################################################
+    #                                                                           #
+    #     Get Population Level Information from tables and columns ----         #
+    #                                                                           #
+    #############################################################################
 
-      # header
-      cli::cli_h1("Airway-01")
+    airway_01_population <- airway_01_population(
+      df = df,
+      erecord_01_col = {{ erecord_01_col }},
+      incident_date_col = {{ incident_date_col }},
+      patient_DOB_col = {{ patient_DOB_col }},
+      epatient_15_col = {{ epatient_15_col }},
+      epatient_16_col = {{ epatient_16_col }},
+      earrest_01_col = {{ earrest_01_col }},
+      eresponse_05_col = {{ eresponse_05_col }},
+      evitals_01_col = {{ evitals_01_col }},
+      evitals_06_col = {{ evitals_06_col }},
+      evitals_12_col = {{ evitals_12_col }},
+      eprocedures_01_col = {{ eprocedures_01_col }},
+      eprocedures_02_col = {{ eprocedures_02_col }},
+      eprocedures_03_col = {{ eprocedures_03_col }},
+      eprocedures_05_col = {{ eprocedures_05_col }},
+      eprocedures_06_col = {{ eprocedures_06_col }}
+    )
 
-      # header
-      cli::cli_h2("Gathering Records for Airway-01")
+    # create a separator ----
+    cli::cli_text("\n")
 
-      #############################################################################
-      #                                                                           #
-      #     Get Population Level Information from tables and columns              #
-      #                                                                           #
-      #############################################################################
+    # header for calculations ----
+    cli::cli_h2("Calculating Airway-01")
 
-      airway_01_population <- airway_01_population(df = df,
-                                                   erecord_01_col = {{ erecord_01_col }},
-                                                   incident_date_col = {{ incident_date_col }},
-                                                   patient_DOB_col = {{ patient_DOB_col }},
-                                                   epatient_15_col = {{ epatient_15_col }},
-                                                   epatient_16_col = {{ epatient_16_col }},
-                                                   earrest_01_col = {{ earrest_01_col }},
-                                                   eresponse_05_col = {{ eresponse_05_col }},
-                                                   evitals_01_col = {{ evitals_01_col }},
-                                                   evitals_06_col = {{ evitals_06_col }},
-                                                   evitals_12_col = {{ evitals_12_col }},
-                                                   eprocedures_01_col = {{ eprocedures_01_col }},
-                                                   eprocedures_02_col = {{ eprocedures_02_col }},
-                                                   eprocedures_03_col = {{ eprocedures_03_col }},
-                                                   eprocedures_05_col = {{ eprocedures_05_col }},
-                                                   eprocedures_06_col = {{ eprocedures_06_col }}
-                                                   )
+    # summary ----
+    airway.01 <- results_summarize(
+      adult_population = airway_01_population$adults,
+      peds_population = airway_01_population$peds,
+      measure_name = "Airway-01",
+      population_names = c("adults", "peds"),
+      numerator_col = numerator_1,
+      confidence_interval = confidence_interval,
+      method = method,
+      conf.level = conf.level,
+      correct = correct,
+      ...
+    )
 
-      # create a separator
-      cli::cli_text("\n")
+    # create a separator ----
+    cli::cli_text("\n")
 
-      # header for calculations
-      cli::cli_h2("Calculating Airway-01")
+    # Calculate and display the runtime ----
+    end_time <- Sys.time()
+    run_time_secs <- difftime(end_time, start_time, units = "secs")
+    run_time_secs <- as.numeric(run_time_secs)
 
-      # summary
-      airway.01 <- results_summarize(
-        adult_population = airway_01_population$adults,
-        peds_population = airway_01_population$peds,
-        measure_name = "Airway-01",
-        population_names = c("adults", "peds"),
-        numerator_col = numerator_1,
-        confidence_interval = confidence_interval,
-        method = method,
-        conf.level = conf.level,
-        correct = correct,
-        ...
+    if (run_time_secs >= 60) {
+      run_time <- round(run_time_secs / 60, 2) # Convert to minutes and round ----
+      cli::cli_alert_success(
+        "Function completed in {cli::col_green(paste0(run_time, 'm'))}."
       )
-
-      # create a separator
-      cli::cli_text("\n")
-
-      # Calculate and display the runtime
-      end_time <- Sys.time()
-      run_time_secs <- difftime(end_time, start_time, units = "secs")
-      run_time_secs <- as.numeric(run_time_secs)
-
-      if (run_time_secs >= 60) {
-
-        run_time <- round(run_time_secs / 60, 2)  # Convert to minutes and round
-        cli::cli_alert_success("Function completed in {cli::col_green(paste0(run_time, 'm'))}.")
-
-      } else {
-
-        run_time <- round(run_time_secs, 2)  # Keep in seconds and round
-        cli::cli_alert_success("Function completed in {cli::col_green(paste0(run_time, 's'))}.")
-
-      }
-
-      # create a separator
-      cli::cli_text("\n")
-
-      # when confidence interval is "wilson", check for n < 10
-      # to warn about incorrect Chi-squared approximation
-      if (any(airway.01$denominator < 10) && method == "wilson" && confidence_interval) {
-
-        cli::cli_warn("In {.fn prop.test}: Chi-squared approximation may be incorrect for any n < 10.")
-
-      }
-
-
-      return(airway.01)
-
+    } else {
+      run_time <- round(run_time_secs, 2) # Keep in seconds and round ----
+      cli::cli_alert_success(
+        "Function completed in {cli::col_green(paste0(run_time, 's'))}."
+      )
     }
 
+    # create a separator ----
+    cli::cli_text("\n")
+
+    # when confidence interval is "wilson", check for n < 10 ----
+    # to warn about incorrect Chi-squared approximation
+    if (
+      any(airway.01$denominator < 10) &&
+        method == "wilson" &&
+        confidence_interval
+    ) {
+      cli::cli_warn(
+        "In {.fn prop.test}: Chi-squared approximation may be incorrect for any n < 10."
+      )
+    }
+
+    return(airway.01)
+  }
 }

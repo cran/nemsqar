@@ -23,7 +23,9 @@ trauma_04_population(
   eresponse_05_col,
   eresponse_10_col,
   transport_disposition_col,
-  edisposition_23_col,
+  edisposition_23_col = lifecycle::deprecated(),
+  edisposition_02_col,
+  trauma_center_facility_IDs,
   evitals_06_col,
   evitals_10_col,
   evitals_12_col,
@@ -42,28 +44,29 @@ trauma_04_population(
 )
 }
 \arguments{
-\item{df}{A data frame or tibble containing EMS data with all relevant
-columns.}
+\item{df}{A dataframe or tibble contianing EMS data where each row represents
+an observation and columns represent features.}
 
-\item{patient_scene_table}{A data.frame or tibble containing only epatient
-and escene fields as a fact table.}
+\item{patient_scene_table}{A data.frame or tibble containing at least
+ePatient, and eScene as a fact table.}
 
-\item{response_table}{A data.frame or tibble containing only the eresponse
-fields needed for this measure's calculations.}
+\item{response_table}{A data.frame or tibble containing at least the
+eResponse fields needed for this measure's calculations.}
 
-\item{situation_table}{A data.frame or tibble containing only the esituation
-fields needed for this measure's calculations.}
+\item{situation_table}{A data.frame or tibble containing at least the
+eSituation fields needed for this measure's calculations. Default is
+\code{NULL}.}
 
-\item{vitals_table}{A data.frame or tibble containing only the evitals fields
-needed for this measure's calculations.}
+\item{vitals_table}{A dataframe or tibble containing at least the eVitals
+fields needed.}
 
-\item{exam_table}{A data.frame or tibble containing only the eexam fields
-needed for this measure's calculations.}
+\item{exam_table}{A data.frame or tibble containing only the eExam fields
+needed for this measure's calculations. Default is \code{NULL}.}
 
-\item{procedures_table}{A data.frame or tibble containing only the
-eprocedures fields needed for this measure's calculations.}
+\item{procedures_table}{A dataframe or tibble containing at least the
+eProcedures fields needed.}
 
-\item{injury_table}{A data.frame or tibble containing only the einjury fields
+\item{injury_table}{A data frame or tibble containing fields from eInjury
 needed for this measure's calculations.}
 
 \item{disposition_table}{A data.frame or tibble containing only the
@@ -72,64 +75,92 @@ edisposition fields needed for this measure's calculations.}
 \item{erecord_01_col}{The column representing the EMS record unique
 identifier.}
 
-\item{incident_date_col}{The column indicating the incident date. Must be of
-class \code{Date} or similar.}
+\item{incident_date_col}{Column that contains the incident date. This
+defaults to \code{NULL} as it is optional in case not available due to PII
+restrictions.}
 
-\item{patient_DOB_col}{The column representing the patient's date of birth.
-Must be of class \code{Date} or similar.}
+\item{patient_DOB_col}{Column that contains the patient's date of birth. This
+defaults to \code{NULL} as it is optional in case not available due to PII
+restrictions.}
 
-\item{epatient_15_col}{The column for patient age numeric value.}
+\item{epatient_15_col}{Column representing the patient's numeric age agnostic
+of unit.}
 
-\item{epatient_16_col}{The column for patient age unit (e.g., "Years",
-"Months").}
+\item{epatient_16_col}{Column representing the patient's age unit ("Years",
+"Months", "Days", "Hours", or "Minutes").}
 
-\item{esituation_02_col}{The column containing information on the presence of
+\item{esituation_02_col}{Column indicating whether or not there was an
 injury.}
 
-\item{eresponse_05_col}{The column representing the 911 response type.}
+\item{eresponse_05_col}{Column that contains eResponse.05 or the response
+type.}
 
-\item{eresponse_10_col}{Column name containing scene delay information.}
+\item{eresponse_10_col}{Column name containing informatin about scene delays,
+if any, of the EMS unit associated with the EMS event.}
 
-\item{transport_disposition_col}{The column for patient transport
-disposition.}
+\item{transport_disposition_col}{One or more unquoted column names (such as
+edisposition.12, edisposition.30) containing transport disposition for an
+EMS event identifying whether a transport occurred and by which unit.}
 
-\item{edisposition_23_col}{Column name containing trauma hospital
-verification information.}
+\item{edisposition_23_col}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Use
+\code{edisposition_02_col} instead. You must also pass a character vector of
+trauma center facility IDs to \code{trauma_center_facility_IDs} to ensure that
+destination facility IDs passed via \code{edisposition_02_col} are correctly
+identified as trauma centers as applicable.}
 
-\item{evitals_06_col}{Column name containing systolic blood pressure (SBP)
+\item{edisposition_02_col}{Column name containing the code of the destination
+the patient was delivered or transferred to.}
+
+\item{trauma_center_facility_IDs}{A character vector of trauma center
+facility IDs that will allow destination facilities documented in
+\code{edisposition_02_col} to be classified correctly as trauma centers when
+applicable.}
+
+\item{evitals_06_col}{Numeric column containing systolic blood pressure
 values.}
 
-\item{evitals_10_col}{Column name containing heart rate values.}
+\item{evitals_10_col}{Column name containing the patient's heart rate
+expressed as a number per minute.}
 
-\item{evitals_12_col}{Column name containing pulse oximetry values.}
+\item{evitals_12_col}{Numeric column containing pulse oximetry values.}
 
-\item{evitals_14_col}{Column name containing capillary refill information.}
+\item{evitals_14_col}{Column name containing the patient's respiratory rate
+expressed as a number per minute.}
 
-\item{evitals_15_col}{Column name containing respiratory effort values.}
+\item{evitals_15_col}{Column name containing the patient's respiratory
+effort.}
 
-\item{evitals_21_col}{Column name containing Glasgow Coma Scale (GCS) Motor
-values.}
+\item{evitals_21_col}{Column name containing the patient's Glasgow Coma Score
+Motor response.}
 
-\item{eexam_16_col}{Column name containing extremities assessment details.}
+\item{eexam_16_col}{Column name containing the assessment findings associated
+with the patient's extremities.}
 
-\item{eexam_20_col}{Column name containing neurological assessment details.}
+\item{eexam_20_col}{Column name containing the assessment findings of the
+patient's neurological examination.}
 
-\item{eexam_23_col}{Column name containing lung assessment details.}
+\item{eexam_23_col}{Column name containing the assessment findings associated
+with the patient's lungs.}
 
-\item{eexam_25_col}{Column name containing chest assessment details.}
+\item{eexam_25_col}{Column name containing the assessment findings associated
+with the patient's chest.}
 
-\item{eprocedures_03_col}{Column name containing airway management or
-tourniquet usage details.}
+\item{eprocedures_03_col}{Column containing procedure codes with or without
+procedure names.}
 
-\item{einjury_01_col}{Column name containing injury cause details.}
+\item{einjury_01_col}{Column name containing the category of the
+reported/suspected external cause of the injury.}
 
-\item{einjury_03_col}{Column name containing trauma triage steps 1 and 2
-information.}
+\item{einjury_03_col}{Column describing Trauma triage criteria for the red
+boxes (Injury Patterns and Mental Status and Vital Signs) in the 2021 ACS
+National Guideline for the Field Triage of Injured Patients.}
 
-\item{einjury_04_col}{Column name containing trauma triage steps 3 and 4
-information.}
+\item{einjury_04_col}{Column name containing Trauma triage criteria for the
+yellow boxes (Mechanism of Injury and EMS Judgment) in the current ACS
+National Guideline for the Field Triage of Injured Patients.}
 
-\item{einjury_09_col}{Column name containing fall height information.}
+\item{einjury_09_col}{Column name containing the distance in feet the patient
+fell, measured from the lowest point of the patient to the ground.}
 }
 \value{
 A list that contains the following:
@@ -138,6 +169,7 @@ A list that contains the following:
 \item a tibble for each population of interest
 \item a tibble for the initial population
 \item a tibble for the total dataset with computations
+\item a tibble with a summary of missingness for each column in each table
 }
 }
 \description{
@@ -194,10 +226,16 @@ calculated the Trauma-04 NEMSQA measure.
 
   # disposition table
   disposition_table <- tibble::tibble(
-    erecord_01 = c("R1", "R2", "R3", "R4", "R5"),
-    edisposition_23 = c(9908029, 9908027, 9908025, 9908023, 9908021),
-    edisposition_30 = c(4230001, 4230003, 4230001, 4230007, 4230007)
-  )
+  erecord_01 = c("R1", "R2", "R3", "R4", "R5"),
+  edisposition_02 = as.character(c(
+    9908029,
+    9908027,
+    9908025,
+    9908023,
+    9876543
+  )),
+  edisposition_30 = c(4230001, 4230003, 4230001, 4230007, 4230007)
+)
 
   # injury table
   injury_table <- tibble::tibble(
@@ -223,41 +261,49 @@ calculated the Trauma-04 NEMSQA measure.
     eprocedures_03 = c(424979004, 427753009, 429705000, 47545007, 243142003)
   )
 
-  # test the success of the function
-  result <- trauma_04_population(patient_scene_table = patient_table,
-                        response_table = response_table,
-                        situation_table = situation_table,
-                        vitals_table = vitals_table,
-                        disposition_table = disposition_table,
-                      exam_table = exam_table,
-                      injury_table = injury_table,
-                      procedures_table = procedures_table,
-                      erecord_01_col = erecord_01,
-                      incident_date_col = incident_date,
-                      patient_DOB_col = patient_dob,
-                      epatient_15_col = epatient_15,
-                      epatient_16_col = epatient_16,
-                      eresponse_05_col = eresponse_05,
-                      eresponse_10_col = eresponse_10,
-                      esituation_02_col = esituation_02,
-                      evitals_06_col = evitals_06,
-                      evitals_10_col = evitals_10,
-                      evitals_12_col = evitals_12,
-                      evitals_14_col = evitals_14,
-                      evitals_15_col = evitals_15,
-                      evitals_21_col = evitals_21,
-                      eexam_16_col = eexam_16,
-                      eexam_20_col = eexam_20,
-                      eexam_23_col = eexam_23,
-                      eexam_25_col = eexam_25,
-                      edisposition_23_col = edisposition_23,
-                      transport_disposition_col = edisposition_30,
-                      eprocedures_03_col = eprocedures_03,
-                      einjury_01_col = einjury_01,
-                      einjury_03_col = einjury_03,
-                      einjury_04_col = einjury_04,
-                      einjury_09_col = einjury_09
-                      )
+# test the success of the function
+result <- trauma_04_population(
+  patient_scene_table = patient_table,
+  response_table = response_table,
+  situation_table = situation_table,
+  vitals_table = vitals_table,
+  disposition_table = disposition_table,
+  exam_table = exam_table,
+  injury_table = injury_table,
+  procedures_table = procedures_table,
+  erecord_01_col = erecord_01,
+  incident_date_col = incident_date,
+  patient_DOB_col = patient_dob,
+  epatient_15_col = epatient_15,
+  epatient_16_col = epatient_16,
+  eresponse_05_col = eresponse_05,
+  eresponse_10_col = eresponse_10,
+  esituation_02_col = esituation_02,
+  evitals_06_col = evitals_06,
+  evitals_10_col = evitals_10,
+  evitals_12_col = evitals_12,
+  evitals_14_col = evitals_14,
+  evitals_15_col = evitals_15,
+  evitals_21_col = evitals_21,
+  eexam_16_col = eexam_16,
+  eexam_20_col = eexam_20,
+  eexam_23_col = eexam_23,
+  eexam_25_col = eexam_25,
+  edisposition_02_col = edisposition_02,
+  trauma_center_facility_IDs = as.character(c(
+    9908029,
+    9908027,
+    9908025,
+    9908023,
+    9908021
+  )),
+  transport_disposition_col = edisposition_30,
+  eprocedures_03_col = eprocedures_03,
+  einjury_01_col = einjury_01,
+  einjury_03_col = einjury_03,
+  einjury_04_col = einjury_04,
+  einjury_09_col = einjury_09
+)
 
 # show the results of filtering at each step
 result$filter_process

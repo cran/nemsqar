@@ -1,12 +1,12 @@
 Package: nemsqar
 Title: National Emergency Medical Service Quality Alliance Measure
         Calculations
-Version: 1.1.2
+Version: 1.2.0
 Authors@R: c(
     person("Nicolas", "Foss", , "nicolas.foss@hhs.iowa.gov", role = c("aut", "cre")),
     person("Samuel", "Kordik", , "samuel.kordik@utsouthwestern.edu", role = "aut",
            comment = c(ORCID = "0000-0003-4230-1154")),
-    person("Alyssa", "Green", , "awhim@nemsqa.org", role = "ctb"),
+    person("Alyssa", "Green", , "agreen@nemsqa.org", role = "ctb"),
     person("Iowa Department of Health and Human Services", role = "cph")
   )
 Description: Designed to automate the calculation of Emergency Medical
@@ -24,20 +24,22 @@ URL: https://github.com/bemts-hhs/nemsqar,
         https://bemts-hhs.github.io/nemsqar/
 BugReports: https://github.com/bemts-hhs/nemsqar/issues
 Depends: R (>= 4.1)
-Imports: cli, dplyr (>= 1.1.4), glue, lifecycle, lubridate (>= 1.9.4),
-        rlang, stats, tibble (>= 3.2.1), tidyselect (>= 1.2.1)
-Suggests: testthat (>= 3.0.0), tidyr
+Imports: cli, dplyr (>= 1.2.1), glue, hms (>= 1.1.4), lifecycle,
+        lubridate (>= 1.9.5), rlang, stats, tibble (>= 3.3.1),
+        tidyselect (>= 1.2.1), utils
+Suggests: knitr, rmarkdown, testthat (>= 3.0.0), tidyr
+VignetteBuilder: knitr
 Config/testthat/edition: 3
 Encoding: UTF-8
 LazyData: true
 LazyDataCompression: bzip2
-RoxygenNote: 7.3.2
+Config/roxygen2/version: 8.0.0
 NeedsCompilation: no
-Packaged: 2025-07-21 14:33:13 UTC; nfoss0
+Packaged: 2026-05-12 15:32:03 UTC; nfoss0
 Author: Nicolas Foss [aut, cre],
   Samuel Kordik [aut] (ORCID: <https://orcid.org/0000-0003-4230-1154>),
   Alyssa Green [ctb],
   Iowa Department of Health and Human Services [cph]
 Maintainer: Nicolas Foss <nicolas.foss@hhs.iowa.gov>
 Repository: CRAN
-Date/Publication: 2025-07-21 15:40:03 UTC
+Date/Publication: 2026-05-12 16:20:02 UTC

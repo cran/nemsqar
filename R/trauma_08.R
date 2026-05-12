@@ -3,59 +3,18 @@
 #' @description
 #'
 #' This function calculates the Trauma-08 measure, which evaluates the
-#completeness ' of pain scale documentation for patients experiencing traumatic
-#injury. It determines ' the total population, adult population, and pediatric
-#population meeting the criteria ' for the Trauma-08 measure.
+#' completeness ' of pain scale documentation for patients experiencing
+#' traumatic injury. It determines ' the total population, adult population, and
+#' pediatric population meeting the criteria ' for the Trauma-08 measure.
 #
-#' @param df A data frame or tibble containing EMS data with all relevant
-#'   columns. Default is `NULL`.
-#' @param patient_scene_table A data frame or tibble containing only epatient
-#'   and escene fields as a fact table. Default is `NULL`.
-#' @param response_table A data frame or tibble containing only the eresponse
-#'   fields needed for this measure's calculations. Default is `NULL`.
-#' @param situation_table A data frame or tibble containing only the esituation
-#'   fields needed for this measure's calculations. Default is `NULL`.
-#' @param disposition_table A data frame or tibble containing only the
-#'   edisposition fields needed for this measure's calculations. Default is
-#'   `NULL`.
-#' @param vitals_table A data frame or tibble containing only the evitals fields
-#'   needed for this measure's calculations. Default is `NULL`.
-#' @param erecord_01_col A column specifying unique patient records.
-#' @param incident_date_col Column that contains the incident date. This
-#'   defaults to `NULL` as it is optional in case not available due to PII
-#'   restrictions.
-#' @param patient_DOB_col Column that contains the patient's date of birth. This
-#'   defaults to `NULL` as it is optional in case not available due to PII
-#'   restrictions.
-#' @param epatient_15_col A column indicating the patient’s age in numeric form.
-#' @param epatient_16_col A column specifying the unit of patient age (e.g.,
-#'   "Years", "Days").
-#' @param esituation_02_col A column containing information about the nature of
-#'   the patient’s condition (e.g., injury type).
-#' @param eresponse_05_col A column specifying the type of response (e.g., 911
-#'   codes).
-#' @param transport_disposition_col A column specifying transport disposition
-#'   for the patient.
-#' @param evitals_06_col A column containing systolic blood pressure (SBP) data
-#'   from initial vital signs.
-#' @param evitals_14_col A column containing respiratory rate data from initial
-#'   vital signs.
-#' @param evitals_23_col A column containing total Glasgow Coma Scale (GCS)
-#'   scores from initial vital signs.
-#' @param confidence_interval `r lifecycle::badge("experimental")` Logical. If
-#'   `TRUE`, the function calculates a confidence interval for the proportion
-#'   estimate.
-#' @param method `r lifecycle::badge("experimental")`Character. Specifies the
-#'   method used to calculate confidence intervals. Options are `"wilson"`
-#'   (Wilson score interval) and `"clopper-pearson"` (exact binomial interval).
-#'   Partial matching is supported, so `"w"` and `"c"` can be used as shorthand.
-#' @param conf.level `r lifecycle::badge("experimental")`Numeric. The confidence
-#'   level for the interval, expressed as a proportion (e.g., 0.95 for a 95%
-#'   confidence interval). Defaults to 0.95.
-#' @param correct `r lifecycle::badge("experimental")`Logical. If `TRUE`,
-#'   applies a continuity correction to the Wilson score interval when `method =
-#'   "wilson"`. Defaults to `TRUE`.
-#' @param ... optional additional arguments to pass onto `dplyr::summarize`.
+#' @inheritParams airway_01_population
+#' @inheritParams asthma_01_population
+#' @inheritParams hypoglycemia_01_population
+#' @inheritParams respiratory_01_population
+#' @inheritParams safety_02_population
+#' @inheritParams trauma_01_population
+#' @inheritParams trauma_08_population
+#' @inheritParams airway_01
 #'
 #' @return A data.frame summarizing results for two population groups (All,
 #'   Adults and Peds) with the following columns:
@@ -107,31 +66,35 @@
 #'
 #' @export
 #'
-trauma_08 <- function(df = NULL,
-                      patient_scene_table = NULL,
-                      response_table = NULL,
-                      situation_table = NULL,
-                      disposition_table = NULL,
-                      vitals_table = NULL,
-                      erecord_01_col,
-                      incident_date_col = NULL,
-                      patient_DOB_col = NULL,
-                      epatient_15_col,
-                      epatient_16_col,
-                      esituation_02_col,
-                      eresponse_05_col,
-                      transport_disposition_col,
-                      evitals_06_col,
-                      evitals_14_col,
-                      evitals_23_col,
-                      confidence_interval = FALSE,
-                      method = c("wilson", "clopper-pearson"),
-                      conf.level = 0.95,
-                      correct = TRUE,
-                      ...) {
-
-  # Set default method and adjustment method
+trauma_08 <- function(
+  df = NULL,
+  patient_scene_table = NULL,
+  response_table = NULL,
+  situation_table = NULL,
+  disposition_table = NULL,
+  vitals_table = NULL,
+  erecord_01_col,
+  incident_date_col = NULL,
+  patient_DOB_col = NULL,
+  epatient_15_col,
+  epatient_16_col,
+  esituation_02_col,
+  eresponse_05_col,
+  transport_disposition_col,
+  evitals_06_col,
+  evitals_14_col,
+  evitals_23_col,
+  confidence_interval = FALSE,
+  method = c("wilson", "clopper-pearson"),
+  conf.level = 0.95,
+  correct = TRUE,
+  ...
+) {
+  # Set default method and adjustment method ----
   method <- match.arg(method, choices = c("wilson", "clopper-pearson"))
+
+  # Ensure that not all table arguments AND the df argument are fulfilled ----
+  # User must pass either `df` or all table arguments, but not both
 
   if (
     any(
@@ -141,19 +104,18 @@ trauma_08 <- function(df = NULL,
       !is.null(disposition_table),
       !is.null(response_table)
     ) &&
-    is.null(df)
+      is.null(df)
   ) {
-
-    # Start timing the function execution
+    # Start timing the function execution ----
     start_time <- Sys.time()
 
-    # Header
+    # Header ----
     cli::cli_h1("Trauma-08")
 
-    # Header
+    # Header ----
     cli::cli_h2("Gathering Records for Trauma-08")
 
-    # Gather the population of interest
+    # Gather the population of interest ----
     trauma_08_populations <- trauma_08_population(
       patient_scene_table = patient_scene_table,
       response_table = response_table,
@@ -173,13 +135,13 @@ trauma_08 <- function(df = NULL,
       transport_disposition_col = {{ transport_disposition_col }}
     )
 
-    # Create a separator
+    # Create a separator ----
     cli::cli_text("\n")
 
-    # Header for calculations
+    # Header for calculations ----
     cli::cli_h2("Calculating Trauma-08")
 
-    # summarize
+    # summarize ----
     trauma.08 <- results_summarize(
       total_population = NULL,
       adult_population = trauma_08_populations$adults,
@@ -194,37 +156,42 @@ trauma_08 <- function(df = NULL,
       ...
     )
 
-    # create a separator
+    # create a separator ----
     cli::cli_text("\n")
 
-    # Calculate and display the runtime
+    # Calculate and display the runtime ----
     end_time <- Sys.time()
     run_time_secs <- difftime(end_time, start_time, units = "secs")
     run_time_secs <- as.numeric(run_time_secs)
 
     if (run_time_secs >= 60) {
-      run_time <- round(run_time_secs / 60, 2)  # Convert to minutes and round
-      cli::cli_alert_success("Function completed in {cli::col_green(paste0(run_time, 'm'))}.")
-
+      run_time <- round(run_time_secs / 60, 2) # Convert to minutes and round
+      cli::cli_alert_success(
+        "Function completed in {cli::col_green(paste0(run_time, 'm'))}."
+      )
     } else {
-      run_time <- round(run_time_secs, 2)  # Keep in seconds and round
-      cli::cli_alert_success("Function completed in {cli::col_green(paste0(run_time, 's'))}.")
-
+      run_time <- round(run_time_secs, 2) # Keep in seconds and round
+      cli::cli_alert_success(
+        "Function completed in {cli::col_green(paste0(run_time, 's'))}."
+      )
     }
 
-    # create a separator
+    # create a separator ----
     cli::cli_text("\n")
 
-    # when confidence interval is "wilson", check for n < 10
+    # when confidence interval is "wilson", check for n < 10 ----
     # to warn about incorrect Chi-squared approximation
-    if (any(trauma.08$denominator < 10) && method == "wilson" && confidence_interval) {
-
-      cli::cli_warn("In {.fn prop.test}: Chi-squared approximation may be incorrect for any n < 10.")
-
+    if (
+      any(trauma.08$denominator < 10) &&
+        method == "wilson" &&
+        confidence_interval
+    ) {
+      cli::cli_warn(
+        "In {.fn prop.test}: Chi-squared approximation may be incorrect for any n < 10."
+      )
     }
 
     return(trauma.08)
-
   } else if (
     any(
       is.null(patient_scene_table),
@@ -234,20 +201,18 @@ trauma_08 <- function(df = NULL,
       is.null(response_table)
     ) &&
 
-    !is.null(df)
-
+      !is.null(df)
   ) {
-
-    # Start timing the function execution
+    # Start timing the function execution ----
     start_time <- Sys.time()
 
-    # Header
+    # Header ----
     cli::cli_h1("Trauma-08")
 
-    # Header
+    # Header ----
     cli::cli_h2("Gathering Records for Trauma-08")
 
-    # Gather the population of interest
+    # Gather the population of interest ----
     trauma_08_populations <- trauma_08_population(
       df = df,
       erecord_01_col = {{ erecord_01_col }},
@@ -263,13 +228,13 @@ trauma_08 <- function(df = NULL,
       transport_disposition_col = {{ transport_disposition_col }}
     )
 
-    # Create a separator
+    # Create a separator ----
     cli::cli_text("\n")
 
-    # Header for calculations
+    # Header for calculations ----
     cli::cli_h2("Calculating Trauma-08")
 
-    # summarize
+    # summarize ----
     trauma.08 <- results_summarize(
       total_population = NULL,
       adult_population = trauma_08_populations$adults,
@@ -284,38 +249,41 @@ trauma_08 <- function(df = NULL,
       ...
     )
 
-    # create a separator
+    # create a separator ----
     cli::cli_text("\n")
 
-    # Calculate and display the runtime
+    # Calculate and display the runtime ----
     end_time <- Sys.time()
     run_time_secs <- difftime(end_time, start_time, units = "secs")
     run_time_secs <- as.numeric(run_time_secs)
 
     if (run_time_secs >= 60) {
-      run_time <- round(run_time_secs / 60, 2)  # Convert to minutes and round
-      cli::cli_alert_success("Function completed in {cli::col_green(paste0(run_time, 'm'))}.")
-
+      run_time <- round(run_time_secs / 60, 2) # Convert to minutes and round
+      cli::cli_alert_success(
+        "Function completed in {cli::col_green(paste0(run_time, 'm'))}."
+      )
     } else {
-      run_time <- round(run_time_secs, 2)  # Keep in seconds and round
-      cli::cli_alert_success("Function completed in {cli::col_green(paste0(run_time, 's'))}.")
-
+      run_time <- round(run_time_secs, 2) # Keep in seconds and round
+      cli::cli_alert_success(
+        "Function completed in {cli::col_green(paste0(run_time, 's'))}."
+      )
     }
 
-    # create a separator
+    # create a separator ----
     cli::cli_text("\n")
 
-    # when confidence interval is "wilson", check for n < 10
+    # when confidence interval is "wilson", check for n < 10 ----
     # to warn about incorrect Chi-squared approximation
-    if (any(trauma.08$denominator < 10) && method == "wilson" && confidence_interval) {
-
-      cli::cli_warn("In {.fn prop.test}: Chi-squared approximation may be incorrect for any n < 10.")
-
+    if (
+      any(trauma.08$denominator < 10) &&
+        method == "wilson" &&
+        confidence_interval
+    ) {
+      cli::cli_warn(
+        "In {.fn prop.test}: Chi-squared approximation may be incorrect for any n < 10."
+      )
     }
 
     return(trauma.08)
-
   }
-
-
 }

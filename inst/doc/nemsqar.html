@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>Getting Started with nemsqar</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Getting Started with nemsqar</h1>
+
+
+
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>The <code>nemsqar</code> package provides an automated and
+reproducible framework for calculating EMS quality measures defined by
+the National EMS Quality Alliance (NEMSQA). These measures are widely
+used by EMS agencies, trauma systems, quality improvement teams, and
+researchers to evaluate performance and support evidence‑based
+improvement activities.</p>
+<p>This vignette is written for users who are knowledgeable in EMS,
+injury epidemiology, or quality improvement, but who may be new to R or
+new to calculating NEMSQA measures using R. The focus is to guide you
+through each step of the workflow: loading data, preparing it for use
+with <code>nemsqar</code>, and running a selected NEMSQA measure.</p>
+<p>By the end of this vignette, you will understand:</p>
+<ul>
+<li>The structure and purpose of the example datasets included in
+<code>nemsqar</code><br />
+</li>
+<li>How to load NEMSQA‑ready tables using synthetic data packaged with
+<code>nemsqar</code><br />
+</li>
+<li>How to prepare EMS data for measure calculation<br />
+</li>
+<li>How to run individual NEMSQA measure functions<br />
+</li>
+<li>How to interpret results generated by the package</li>
+</ul>
+<p>The sections that follow walk through the entire process, from
+loading EMS data in R to producing a standardized performance measure
+aligned with national reporting expectations.</p>
+</div>
+<div id="the-measures" class="section level1">
+<h1>The Measures</h1>
+<p>This vignette focuses on one NEMSQA measure implemented in
+<code>nemsqar</code>:</p>
+<ul>
+<li><strong>Asthma‑01</strong>: Assessment and treatment of patients
+with suspected asthma</li>
+</ul>
+<p>All measures in <code>nemsqar</code> follow the same basic structure.
+Each one requires a defined set of NEMSIS‑aligned tables and returns
+results in a standardized format. The following sections introduce the
+data required to calculate this measure and demonstrate how to run it in
+R.</p>
+</div>
+<div id="the-data" class="section level1">
+<h1>The Data</h1>
+<p>Before calculating any measure, it is important to understand the
+example datasets included with <code>nemsqar</code>. These datasets are
+small, synthetic representations of NEMSIS tables. They provide a safe
+environment for learning the workflow before applying it to production
+EMS data. Because NEMSQA measure logic relies on the NEMSIS data
+structure, each measure requires several tables (for example, patient,
+response, situation, medications, vitals).</p>
+<div id="loading-example-data" class="section level2">
+<h2>Loading Example Data</h2>
+<p>The <code>nemsqar</code> package includes synthetic datasets that
+mirror the NEMSIS tables required for NEMSQA measure calculation. You
+can load them with the <code>data()</code> function. For Asthma‑01, the
+following tables are required:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;nemsqar_patient_scene_table&quot;</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;nemsqar_response_table&quot;</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;nemsqar_situation_table&quot;</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;nemsqar_medications_table&quot;</span>)</span></code></pre></div>
+<p>Each dataset loads into your R environment as a standard data
+frame.</p>
+<div id="loading-your-own-data" class="section level3">
+<h3>Loading your own data</h3>
+<p>In practice, you will typically load your own EMS datasets. These may
+come from CSV files, databases, or data extracts. Below are common
+patterns for loading local files:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="co"># Store your file path, preferably in .Renviron files</span></span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>path <span class="ot">&lt;-</span> <span class="fu">file.path</span>(<span class="st">&quot;some_path_to_file&quot;</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="co"># Load data from the path using the tidyverse package `readr`</span></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>data <span class="ot">&lt;-</span> readr<span class="sc">::</span><span class="fu">read_csv</span>(path)</span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="co"># Load data from the path using base R</span></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="at">file =</span> path)</span></code></pre></div>
+</div>
+</div>
+<div id="inspecting-table-structure" class="section level2">
+<h2>Inspecting Table Structure</h2>
+<p>Because many users are new to R, it is important to verify that each
+dataset loaded correctly and contains the variables required by the
+measure functions. A few simple commands help confirm this.</p>
+<div id="review-the-structure-of-a-loaded-dataset" class="section level3">
+<h3>Review the structure of a loaded dataset</h3>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="co"># Quick overview of column names and data types</span></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>dplyr<span class="sc">::</span><span class="fu">glimpse</span>(nemsqar_patient_scene_table)</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="co">#&gt; Rows: 10,000</span></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="co">#&gt; Columns: 6</span></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="co">#&gt; $ `Incident Patient Care Report Number - PCR (eRecord.01)` &lt;chr&gt; &quot;NyXFBlJfnm-8…</span></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="co">#&gt; $ `Incident Date`                                          &lt;date&gt; 2023-12-20, …</span></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="co">#&gt; $ `Patient Age (ePatient.15)`                              &lt;dbl&gt; 98, 75, 24, 1…</span></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="co">#&gt; $ `Patient Age Units (ePatient.16)`                        &lt;chr&gt; &quot;Minutes&quot;, &quot;D…</span></span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="co">#&gt; $ `Patient Date Of Birth (ePatient.17)`                    &lt;date&gt; 2023-12-19, …</span></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="co">#&gt; $ `Patient Gender (ePatient.13)`                           &lt;chr&gt; &quot;Male to Fema…</span></span></code></pre></div>
+</div>
+<div id="view-the-first-few-rows" class="section level3">
+<h3>View the first few rows</h3>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="co"># An abbreviated look at the actual data tables</span></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="fu">head</span>(nemsqar_patient_scene_table, <span class="at">n =</span> <span class="dv">10</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="co">#&gt; # A tibble: 10 × 6</span></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="co">#&gt;    Incident Patient Care Report Number …¹ `Incident Date` Patient Age (ePatien…²</span></span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="co">#&gt;    &lt;chr&gt;                                  &lt;date&gt;                           &lt;dbl&gt;</span></span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="co">#&gt;  1 NyXFBlJfnm-8333586176                  2023-12-20                          98</span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="co">#&gt;  2 XTLCINMLTP-8616021114                  2023-08-30                          75</span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="co">#&gt;  3 HfYjlIEQSk-9529756610                  2023-03-21                          24</span></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="co">#&gt;  4 MOwVDhriyC-5915613206                  2023-09-13                         115</span></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="co">#&gt;  5 ZCGOtLEPKw-7820135532                  2023-02-21                          54</span></span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="co">#&gt;  6 fEMvUCQCRQ-9052388486                  2023-08-23                          88</span></span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="co">#&gt;  7 VTLPiFWWGd-6806896482                  2023-12-09                          83</span></span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a><span class="co">#&gt;  8 YvZbHRTUuK-8780915452                  2023-04-06                          24</span></span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="co">#&gt;  9 DkKIjJSFtA-7499641828                  2023-05-07                          95</span></span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a><span class="co">#&gt; 10 CIQMuVGJgS-9144926148                  2023-11-13                          82</span></span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a><span class="co">#&gt; # ℹ abbreviated names:</span></span>
+<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a><span class="co">#&gt; #   ¹​`Incident Patient Care Report Number - PCR (eRecord.01)`,</span></span>
+<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a><span class="co">#&gt; #   ²​`Patient Age (ePatient.15)`</span></span>
+<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a><span class="co">#&gt; # ℹ 3 more variables: `Patient Age Units (ePatient.16)` &lt;chr&gt;,</span></span>
+<span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a><span class="co">#&gt; #   `Patient Date Of Birth (ePatient.17)` &lt;date&gt;,</span></span>
+<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a><span class="co">#&gt; #   `Patient Gender (ePatient.13)` &lt;chr&gt;</span></span></code></pre></div>
+<p>These functions allow you to check column names, data types, and
+basic record structure. This step is essential because NEMSQA logic
+depends on specific fields. Incorrect data types (for example, character
+instead of numeric) will cause measure functions to fail.</p>
+</div>
+<div id="data-types" class="section level3">
+<h3>Data types</h3>
+<p>The example datasets included in <code>nemsqar</code> already use
+appropriate data types. When working with real EMS data, you must verify
+these types manually. This ensures that the data satisfy validation
+requirements and prevents errors during measure calculation.</p>
+<p>In practice, EMS data commonly include issues such as:</p>
+<ul>
+<li>Dates stored as character strings<br />
+</li>
+<li>Numeric values stored as text (for example, <code>&quot;5&quot;</code> instead
+of <code>5</code>)<br />
+</li>
+<li>Empty strings used in place of <code>NA</code><br />
+</li>
+<li>Mixed formats within the same column</li>
+</ul>
+<p>Below are examples of how to identify and correct these issues before
+running any <code>nemsqar</code> measure.</p>
+<div id="example-converting-character-dates-to-proper-date-formats" class="section level4">
+<h4>Example: Converting character dates to proper date formats</h4>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="co"># Example: incident dates stored as character values</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>example_data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>  <span class="at">Incident_Date =</span> <span class="fu">c</span>(<span class="st">&quot;2023-01-10&quot;</span>, <span class="st">&quot;01/12/2023&quot;</span>, <span class="st">&quot;20230114&quot;</span>),</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>  <span class="at">stringsAsFactors =</span> <span class="cn">FALSE</span></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>)</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="co"># Convert using lubridate (recommended)</span></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>example_data<span class="sc">$</span>Incident_Date <span class="ot">&lt;-</span> lubridate<span class="sc">::</span><span class="fu">parse_date_time</span>(</span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a>  example_data<span class="sc">$</span>Incident_Date,</span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a>  <span class="at">orders =</span> <span class="fu">c</span>(<span class="st">&quot;ymd&quot;</span>, <span class="st">&quot;mdy&quot;</span>, <span class="st">&quot;Ymd&quot;</span>)</span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a>)</span></code></pre></div>
+</div>
+<div id="example-converting-numbers-stored-as-character-strings" class="section level4">
+<h4>Example: Converting numbers stored as character strings</h4>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>numeric_example <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>  <span class="co"># note that 45 here has whitespace surrounding the value</span></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>  <span class="at">Patient_Age_raw =</span> <span class="fu">c</span>(<span class="st">&quot;34&quot;</span>, <span class="st">&quot;18&quot;</span>, <span class="st">&quot;07&quot;</span>, <span class="st">&quot; 45 &quot;</span>)</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>)</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="co"># Trim whitespace and convert to numeric</span></span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>numeric_example<span class="sc">$</span>Patient_Age <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(<span class="fu">trimws</span>(</span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>  numeric_example<span class="sc">$</span>Patient_Age_raw</span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a>))</span></code></pre></div>
+</div>
+<div id="example-replacing-empty-strings-with-na" class="section level4">
+<h4>Example: Replacing empty strings with NA</h4>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>missing_example <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>  <span class="at">eSituation_11 =</span> <span class="fu">c</span>(<span class="st">&quot;&quot;</span>, <span class="st">&quot;R41.82&quot;</span>, <span class="st">&quot;&quot;</span>, <span class="st">&quot;T14.90&quot;</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>)</span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="co"># Replace empty strings with NA</span></span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>missing_example<span class="sc">$</span>eSituation_11 <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">na_if</span>(missing_example<span class="sc">$</span>eSituation_11, <span class="st">&quot;&quot;</span>)</span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a></span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>missing_example</span></code></pre></div>
+</div>
+<div id="why-these-steps-matter" class="section level4">
+<h4>Why these steps matter</h4>
+<p>Date fields are used for patient age computation and for time‑based
+denominators. If these values are stored as character strings or in
+inconsistent formats, the measure logic will not execute correctly.</p>
+<p>Numeric fields such as age, blood pressure, respiratory rate, or
+dosage must be numeric to satisfy validation checks and ensure
+appropriate comparisons.</p>
+<p>Empty strings cause false exclusions during population filtering,
+especially when <code>nemsqar</code> logic expects missing values to be
+formally represented as NA.</p>
+<p>Ensuring correct data types prior to running any nemsqar function
+improves reproducibility, reduces debugging time, and allows the measure
+logic to operate as intended.</p>
+</div>
+</div>
+<div id="dealing-with-problematic-column-names" class="section level3">
+<h3>Dealing with problematic column names</h3>
+<p>If your datasets already have clean names, you may skip this
+step.</p>
+<p>EMS registry data often contain column names with spaces,
+punctuation, or special characters. These can make programming in R more
+difficult. To avoid these issues, it is helpful to standardize column
+names before running any measures.</p>
+<p>Below is a simple reusable function to clean column names by
+replacing spaces and special characters with underscores.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="co"># Define a reusable column-cleaning function</span></span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>clean_cols <span class="ot">&lt;-</span> <span class="cf">function</span>(data) {</span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>  data <span class="sc">|&gt;</span></span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">rename_with</span>(</span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>      <span class="at">.cols =</span> tidyselect<span class="sc">::</span><span class="fu">everything</span>(),</span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>      <span class="sc">~</span> . <span class="sc">|&gt;</span></span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a>        <span class="fu">gsub</span>(<span class="at">pattern =</span> <span class="st">&quot;</span><span class="sc">\\</span><span class="st">.|</span><span class="sc">\\</span><span class="st">(|-|</span><span class="sc">\\</span><span class="st">s&quot;</span>, <span class="at">replacement =</span> <span class="st">&quot;_&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a>        <span class="fu">gsub</span>(<span class="at">pattern =</span> <span class="st">&quot;_+&quot;</span>, <span class="at">replacement =</span> <span class="st">&quot;_&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a>        <span class="fu">gsub</span>(<span class="at">pattern =</span> <span class="st">&quot;</span><span class="sc">\\</span><span class="st">)&quot;</span>, <span class="at">replacement =</span> <span class="st">&quot;&quot;</span>)</span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a>    )</span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a>}</span>
+<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a></span>
+<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a><span class="co"># Apply cleaning to each table</span></span>
+<span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a>nemsqar_patient_scene_data <span class="ot">&lt;-</span> nemsqar_patient_scene_table <span class="sc">|&gt;</span> <span class="fu">clean_cols</span>()</span>
+<span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a>nemsqar_response_data <span class="ot">&lt;-</span> nemsqar_response_table <span class="sc">|&gt;</span> <span class="fu">clean_cols</span>()</span>
+<span id="cb8-16"><a href="#cb8-16" tabindex="-1"></a>nemsqar_situation_data <span class="ot">&lt;-</span> nemsqar_situation_table <span class="sc">|&gt;</span> <span class="fu">clean_cols</span>()</span>
+<span id="cb8-17"><a href="#cb8-17" tabindex="-1"></a>nemsqar_medications_data <span class="ot">&lt;-</span> nemsqar_medications_table <span class="sc">|&gt;</span> <span class="fu">clean_cols</span>()</span>
+<span id="cb8-18"><a href="#cb8-18" tabindex="-1"></a></span>
+<span id="cb8-19"><a href="#cb8-19" tabindex="-1"></a><span class="co"># Inspect the cleaned patient/scene table</span></span>
+<span id="cb8-20"><a href="#cb8-20" tabindex="-1"></a>dplyr<span class="sc">::</span><span class="fu">glimpse</span>(nemsqar_patient_scene_data)</span>
+<span id="cb8-21"><a href="#cb8-21" tabindex="-1"></a><span class="co">#&gt; Rows: 10,000</span></span>
+<span id="cb8-22"><a href="#cb8-22" tabindex="-1"></a><span class="co">#&gt; Columns: 6</span></span>
+<span id="cb8-23"><a href="#cb8-23" tabindex="-1"></a><span class="co">#&gt; $ Incident_Patient_Care_Report_Number_PCR_eRecord_01 &lt;chr&gt; &quot;NyXFBlJfnm-8333586…</span></span>
+<span id="cb8-24"><a href="#cb8-24" tabindex="-1"></a><span class="co">#&gt; $ Incident_Date                                      &lt;date&gt; 2023-12-20, 2023-0…</span></span>
+<span id="cb8-25"><a href="#cb8-25" tabindex="-1"></a><span class="co">#&gt; $ Patient_Age_ePatient_15                            &lt;dbl&gt; 98, 75, 24, 115, 54…</span></span>
+<span id="cb8-26"><a href="#cb8-26" tabindex="-1"></a><span class="co">#&gt; $ Patient_Age_Units_ePatient_16                      &lt;chr&gt; &quot;Minutes&quot;, &quot;Days&quot;, …</span></span>
+<span id="cb8-27"><a href="#cb8-27" tabindex="-1"></a><span class="co">#&gt; $ Patient_Date_Of_Birth_ePatient_17                  &lt;date&gt; 2023-12-19, 2023-0…</span></span>
+<span id="cb8-28"><a href="#cb8-28" tabindex="-1"></a><span class="co">#&gt; $ Patient_Gender_ePatient_13                         &lt;chr&gt; &quot;Male to Female, Tr…</span></span></code></pre></div>
+<p>Now, special characters and whitespace are either removed or replaced
+with <code>_</code> so R can more easily recognize the column names, and
+we can avoid annoying conventions to find column names.</p>
+</div>
+</div>
+<div id="understanding-required-inputs" class="section level2">
+<h2>Understanding Required Inputs</h2>
+<p>Each NEMSQA measure requires a specific set of input tables. Although
+<code>nemsqar</code> can accept a single combined dataset through the
+<code>df</code> argument, this approach is not recommended. The
+preferred workflow is to supply separate tables using the
+<code>*_table</code> arguments (for example,
+<code>patient_scene_table</code>, <code>response_table</code>). This
+aligns with the NEMSIS structure, where elements such as ePatient,
+eScene, eResponse, and eSituation are stored in distinct tables.</p>
+<p>In practice, your data should follow this multi‑table structure:</p>
+<ul>
+<li>Patient and scene data stored together (1:1)</li>
+<li>Response data stored separately</li>
+<li>Situation data stored separately</li>
+<li>Medications and vitals stored in their respective tables</li>
+</ul>
+<p>Each measure expects a consistent set of these tables. For
+example:</p>
+<ul>
+<li><strong>Asthma‑01</strong> requires patient, response, situation,
+and medication tables.</li>
+</ul>
+<p>The next sections demonstrate how to supply these inputs to
+<code>nemsqar</code> and how to calculate a measure.</p>
+</div>
+</div>
+<div id="running-the-nemsqa-measures-using-nemsqar" class="section level1">
+<h1>Running the NEMSQA Measures Using <code>nemsqar</code></h1>
+<p>Once the required tables are loaded, you can calculate your first
+measure. Each measure in <code>nemsqar</code> is implemented through a
+dedicated function that accepts NEMSIS‑aligned tables and returns
+standardized results.</p>
+<div id="nemsqar-workhorse-functions" class="section level2">
+<h2><code>nemsqar</code> workhorse functions</h2>
+<p>Each measure is built using two core functions:</p>
+<ul>
+<li>A <strong>wrapper function</strong> named <code>measure_##()</code>
+(for example, <code>asthma_01()</code>)</li>
+<li>A corresponding <strong>population function</strong>, such as
+<code>asthma_01_population()</code></li>
+</ul>
+<p>The wrapper function performs two main tasks. First, it calls the
+population function to identify the population of interest. Then it
+applies the measure logic to estimate performance. Each NEMSQA measure
+follows this same pattern.</p>
+<div id="running-the-wrapper-function-for-asthma01" class="section level3">
+<h3>Running the wrapper function for Asthma‑01</h3>
+<p>The <code>asthma_01()</code> function requires several NEMSIS‑aligned
+tables and column mappings. All arguments shown below are required. Each
+column argument identifies the specific NEMSIS field used by the measure
+logic. Note that most argument names signal the corresponding NEMSIS
+data element. For example, <code>eresponse_05_col</code> corresponds to
+eResponse.05 in the NEMSIS data dictionary.</p>
+<p>To help you map your own data, the list below shows how several key
+arguments align with their corresponding NEMSIS elements:</p>
+<ul>
+<li><code>erecord_01_col</code> –&gt; eRecord.01 (PCR number)<br />
+</li>
+<li><code>incident_date_col</code> –&gt; eTimes.03 (Unit Notified by
+Dispatch Date/Time)</li>
+<li><code>patient_DOB_col</code> –&gt; ePatient.17 (patient date of
+birth)<br />
+</li>
+<li><code>epatient_15_col</code> –&gt; ePatient.15 (patient age)<br />
+</li>
+<li><code>epatient_16_col</code> –&gt; ePatient.16 (age units)<br />
+</li>
+<li><code>eresponse_05_col</code> –&gt; eResponse.05 (type of service
+requested)<br />
+</li>
+<li><code>esituation_11_col</code> –&gt; eSituation.11 (primary
+impression)<br />
+</li>
+<li><code>esituation_12_col</code> –&gt; eSituation.12 (secondary
+impression)<br />
+</li>
+<li><code>emedications_03_col</code> –&gt; eMedications.03 (medication
+administered)</li>
+</ul>
+<p>These mappings ensure that each argument references the correct
+NEMSIS data element when running the measure.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="co"># Run Asthma‑01 without grouping</span></span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>asthma_01_all <span class="ot">&lt;-</span> <span class="fu">asthma_01</span>(</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>  <span class="at">patient_scene_table =</span> nemsqar_patient_scene_data,</span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>  <span class="at">response_table =</span> nemsqar_response_data,</span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>  <span class="at">situation_table =</span> nemsqar_situation_data,</span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>  <span class="at">medications_table =</span> nemsqar_medications_data,</span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a>  <span class="at">erecord_01_col =</span> Incident_Patient_Care_Report_Number_PCR_eRecord_01,</span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a>  <span class="at">incident_date_col =</span> Incident_Date,</span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a>  <span class="at">patient_DOB_col =</span> Patient_Date_Of_Birth_ePatient_17,</span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a>  <span class="at">epatient_15_col =</span> Patient_Age_ePatient_15,</span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a>  <span class="at">epatient_16_col =</span> Patient_Age_Units_ePatient_16,</span>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a>  <span class="at">eresponse_05_col =</span> Response_Type_Of_Service_Requested_With_Code_eResponse_05,</span>
+<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a>  <span class="at">esituation_11_col =</span> Situation_Provider_Primary_Impression_Code_And_Description_eSituation_11,</span>
+<span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a>  <span class="at">esituation_12_col =</span> Situation_Provider_Secondary_Impression_Description_And_Code_List_eSituation_12,</span>
+<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a>  <span class="at">emedications_03_col =</span> Patient_Medication_Given_or_Administered_Description_And_RXCUI_Codes_List_eMedications_03,</span>
+<span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a>  <span class="at">confidence_interval =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb9-17"><a href="#cb9-17" tabindex="-1"></a>  <span class="at">method =</span> <span class="st">&quot;clopper-pearson&quot;</span>,</span>
+<span id="cb9-18"><a href="#cb9-18" tabindex="-1"></a>  <span class="at">conf.level =</span> <span class="fl">0.95</span></span>
+<span id="cb9-19"><a href="#cb9-19" tabindex="-1"></a>)</span>
+<span id="cb9-20"><a href="#cb9-20" tabindex="-1"></a></span>
+<span id="cb9-21"><a href="#cb9-21" tabindex="-1"></a></span>
+<span id="cb9-22"><a href="#cb9-22" tabindex="-1"></a><span class="co"># print the results</span></span>
+<span id="cb9-23"><a href="#cb9-23" tabindex="-1"></a>asthma_01_all</span>
+<span id="cb9-24"><a href="#cb9-24" tabindex="-1"></a><span class="co">#&gt; # A tibble: 3 × 8</span></span>
+<span id="cb9-25"><a href="#cb9-25" tabindex="-1"></a><span class="co">#&gt;   measure   pop    numerator denominator  prop prop_label lower_ci upper_ci</span></span>
+<span id="cb9-26"><a href="#cb9-26" tabindex="-1"></a><span class="co">#&gt;   &lt;chr&gt;     &lt;chr&gt;      &lt;int&gt;       &lt;int&gt; &lt;dbl&gt; &lt;chr&gt;         &lt;dbl&gt;    &lt;dbl&gt;</span></span>
+<span id="cb9-27"><a href="#cb9-27" tabindex="-1"></a><span class="co">#&gt; 1 Asthma-01 Adults         0           4 0     0%           0         0.602</span></span>
+<span id="cb9-28"><a href="#cb9-28" tabindex="-1"></a><span class="co">#&gt; 2 Asthma-01 Peds           3          25 0.12  12%          0.0255    0.312</span></span>
+<span id="cb9-29"><a href="#cb9-29" tabindex="-1"></a><span class="co">#&gt; 3 Asthma-01 All            3          29 0.103 10.34%       0.0219    0.274</span></span></code></pre></div>
+<p>The output reflects the measure population, denominator, numerator,
+and final performance classification for each record. This structure is
+consistent across all NEMSQA measures implemented in
+<code>nemsqar</code>.</p>
+</div>
+<div id="running-the-asthma_01-wrapper-function-using-grouping" class="section level3">
+<h3>Running the <code>asthma_01</code> wrapper function using
+grouping</h3>
+<p><code>nemsqar</code> allows you to calculate a measure for the entire
+dataset or for specific subgroups. Grouping can be useful when you want
+to understand performance within meaningful categories, such as age
+groups, service types, or impressions. Grouping is implemented using the
+<code>.by</code> argument, which follows the same syntax used in
+<code>dplyr::summarize()</code>.</p>
+<p>The example below shows how to run <strong>Asthma‑01</strong> grouped
+by age units. All required tables and column mappings remain the same;
+the only additional argument is <code>.by</code>.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="co"># Run `asthma_01` for a whole dataset, group by age units.</span></span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a><span class="co"># All core inputs remain the same. Only the .by argument is added.</span></span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>asthma_01_age <span class="ot">&lt;-</span> <span class="fu">asthma_01</span>(</span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a>  <span class="at">patient_scene_table =</span> nemsqar_patient_scene_data,</span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a>  <span class="at">response_table =</span> nemsqar_response_data,</span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a>  <span class="at">situation_table =</span> nemsqar_situation_data,</span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a>  <span class="at">medications_table =</span> nemsqar_medications_data,</span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a>  <span class="at">erecord_01_col =</span> Incident_Patient_Care_Report_Number_PCR_eRecord_01,</span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a>  <span class="at">incident_date_col =</span> Incident_Date,</span>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a>  <span class="at">patient_DOB_col =</span> Patient_Date_Of_Birth_ePatient_17,</span>
+<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a>  <span class="at">epatient_15_col =</span> Patient_Age_ePatient_15,</span>
+<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a>  <span class="at">epatient_16_col =</span> Patient_Age_Units_ePatient_16,</span>
+<span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a>  <span class="at">eresponse_05_col =</span> Response_Type_Of_Service_Requested_With_Code_eResponse_05,</span>
+<span id="cb10-14"><a href="#cb10-14" tabindex="-1"></a>  <span class="at">esituation_11_col =</span> Situation_Provider_Primary_Impression_Code_And_Description_eSituation_11,</span>
+<span id="cb10-15"><a href="#cb10-15" tabindex="-1"></a>  <span class="at">esituation_12_col =</span> Situation_Provider_Secondary_Impression_Description_And_Code_List_eSituation_12,</span>
+<span id="cb10-16"><a href="#cb10-16" tabindex="-1"></a>  <span class="at">emedications_03_col =</span> Patient_Medication_Given_or_Administered_Description_And_RXCUI_Codes_List_eMedications_03,</span>
+<span id="cb10-17"><a href="#cb10-17" tabindex="-1"></a>  <span class="at">confidence_interval =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb10-18"><a href="#cb10-18" tabindex="-1"></a>  <span class="at">method =</span> <span class="st">&quot;clopper-pearson&quot;</span>,</span>
+<span id="cb10-19"><a href="#cb10-19" tabindex="-1"></a>  <span class="at">conf.level =</span> <span class="fl">0.95</span>,</span>
+<span id="cb10-20"><a href="#cb10-20" tabindex="-1"></a>  <span class="co"># notice here that we use the `.by` argument from `dplyr::summarize` to group</span></span>
+<span id="cb10-21"><a href="#cb10-21" tabindex="-1"></a>  <span class="co"># our analysis</span></span>
+<span id="cb10-22"><a href="#cb10-22" tabindex="-1"></a>  <span class="at">.by =</span> Patient_Age_Units_ePatient_16</span>
+<span id="cb10-23"><a href="#cb10-23" tabindex="-1"></a>)</span>
+<span id="cb10-24"><a href="#cb10-24" tabindex="-1"></a></span>
+<span id="cb10-25"><a href="#cb10-25" tabindex="-1"></a><span class="co"># print the results</span></span>
+<span id="cb10-26"><a href="#cb10-26" tabindex="-1"></a>asthma_01_age</span>
+<span id="cb10-27"><a href="#cb10-27" tabindex="-1"></a><span class="co">#&gt; # A tibble: 10 × 9</span></span>
+<span id="cb10-28"><a href="#cb10-28" tabindex="-1"></a><span class="co">#&gt;    Patient_Age_Units_ePa…¹ measure pop   numerator denominator   prop prop_label</span></span>
+<span id="cb10-29"><a href="#cb10-29" tabindex="-1"></a><span class="co">#&gt;    &lt;chr&gt;                   &lt;chr&gt;   &lt;chr&gt;     &lt;int&gt;       &lt;int&gt;  &lt;dbl&gt; &lt;chr&gt;     </span></span>
+<span id="cb10-30"><a href="#cb10-30" tabindex="-1"></a><span class="co">#&gt;  1 Years                   Asthma… Adul…         0           4 0      0%        </span></span>
+<span id="cb10-31"><a href="#cb10-31" tabindex="-1"></a><span class="co">#&gt;  2 Months                  Asthma… Peds          1          12 0.0833 8.33%     </span></span>
+<span id="cb10-32"><a href="#cb10-32" tabindex="-1"></a><span class="co">#&gt;  3 Minutes                 Asthma… Peds          2           9 0.222  22.22%    </span></span>
+<span id="cb10-33"><a href="#cb10-33" tabindex="-1"></a><span class="co">#&gt;  4 Hours                   Asthma… Peds          0           2 0      0%        </span></span>
+<span id="cb10-34"><a href="#cb10-34" tabindex="-1"></a><span class="co">#&gt;  5 Days                    Asthma… Peds          0           2 0      0%        </span></span>
+<span id="cb10-35"><a href="#cb10-35" tabindex="-1"></a><span class="co">#&gt;  6 Months                  Asthma… All           1          12 0.0833 8.33%     </span></span>
+<span id="cb10-36"><a href="#cb10-36" tabindex="-1"></a><span class="co">#&gt;  7 Minutes                 Asthma… All           2           9 0.222  22.22%    </span></span>
+<span id="cb10-37"><a href="#cb10-37" tabindex="-1"></a><span class="co">#&gt;  8 Hours                   Asthma… All           0           2 0      0%        </span></span>
+<span id="cb10-38"><a href="#cb10-38" tabindex="-1"></a><span class="co">#&gt;  9 Years                   Asthma… All           0           4 0      0%        </span></span>
+<span id="cb10-39"><a href="#cb10-39" tabindex="-1"></a><span class="co">#&gt; 10 Days                    Asthma… All           0           2 0      0%        </span></span>
+<span id="cb10-40"><a href="#cb10-40" tabindex="-1"></a><span class="co">#&gt; # ℹ abbreviated name: ¹​Patient_Age_Units_ePatient_16</span></span>
+<span id="cb10-41"><a href="#cb10-41" tabindex="-1"></a><span class="co">#&gt; # ℹ 2 more variables: lower_ci &lt;dbl&gt;, upper_ci &lt;dbl&gt;</span></span></code></pre></div>
+<p>Grouping is optional, and can reveal differences in performance
+across patient subpopulations and can be applied to any NEMSQA measure
+using the same <code>.by</code> syntax.</p>
+</div>
+</div>
+<div id="working-with-the-_population-functions" class="section level2">
+<h2>Working with the <code>*_population()</code> functions</h2>
+<p>Each NEMSQA measure includes a companion <code>*_population()</code>
+function. These functions identify the population of interest by
+applying the full set of inclusion and exclusion criteria defined by
+NEMSQA. They perform all filtering, validation, and intermediate
+computations needed to determine which records belong in the measure
+denominator.</p>
+<p>Each population function returns a <code>list</code> containing
+several tibbles that help you examine the population:</p>
+<ul>
+<li>A tibble with counts for each filtering step<br />
+</li>
+<li>Tibbles for specific populations (for example, adult, pediatric, or
+all patients)<br />
+</li>
+<li>A tibble showing the initial population before any filtering<br />
+</li>
+<li>A tibble with the full dataset and computed fields<br />
+</li>
+<li>A tibble summarizing missingness for required columns across all
+tables</li>
+</ul>
+<p>These objects are useful when validating data quality, understanding
+how records flowed through the NEMSQA criteria, and troubleshooting
+unexpected measure results. In practice, population functions are most
+useful when you need to verify which records were included or excluded
+from the denominator and why. Analysts often use these functions when
+denominator counts look unexpected, when investigating data quality
+issues, or when comparing populations across systems or years. They
+provide a transparent view of how NEMSQA logic was applied to your
+data.</p>
+<p>The example below demonstrates how to use
+<code>asthma_01_population()</code> to inspect the population identified
+for Asthma‑01.</p>
+<div id="using-asthma_01_population-to-examine-the-target-population" class="section level3">
+<h3>Using <code>asthma_01_population()</code> to examine the target
+population</h3>
+<p>The <code>asthma_01_population()</code> function identifies the
+population of interest by applying all NEMSQA inclusion and exclusion
+criteria. The function uses the same required tables and column mappings
+as <code>asthma_01()</code>, but it does not calculate performance
+estimates and does not use confidence interval or grouping arguments</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="co"># Run `asthma_01_population` for a whole dataset</span></span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a><span class="co"># The code is virtually the same as `asthma_01()`, but we do not use the</span></span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a><span class="co"># confidence interval arguments, nor the tidy dot `...` arguments for grouping</span></span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a><span class="co"># or other operations via `dplyr::summarize`</span></span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a>populations_asthma_01 <span class="ot">&lt;-</span> <span class="fu">asthma_01_population</span>(</span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a>  <span class="at">patient_scene_table =</span> nemsqar_patient_scene_data,</span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a>  <span class="at">response_table =</span> nemsqar_response_data,</span>
+<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a>  <span class="at">situation_table =</span> nemsqar_situation_data,</span>
+<span id="cb11-9"><a href="#cb11-9" tabindex="-1"></a>  <span class="at">medications_table =</span> nemsqar_medications_data,</span>
+<span id="cb11-10"><a href="#cb11-10" tabindex="-1"></a>  <span class="at">erecord_01_col =</span> Incident_Patient_Care_Report_Number_PCR_eRecord_01,</span>
+<span id="cb11-11"><a href="#cb11-11" tabindex="-1"></a>  <span class="at">incident_date_col =</span> Incident_Date,</span>
+<span id="cb11-12"><a href="#cb11-12" tabindex="-1"></a>  <span class="at">patient_DOB_col =</span> Patient_Date_Of_Birth_ePatient_17,</span>
+<span id="cb11-13"><a href="#cb11-13" tabindex="-1"></a>  <span class="at">epatient_15_col =</span> Patient_Age_ePatient_15,</span>
+<span id="cb11-14"><a href="#cb11-14" tabindex="-1"></a>  <span class="at">epatient_16_col =</span> Patient_Age_Units_ePatient_16,</span>
+<span id="cb11-15"><a href="#cb11-15" tabindex="-1"></a>  <span class="at">eresponse_05_col =</span> Response_Type_Of_Service_Requested_With_Code_eResponse_05,</span>
+<span id="cb11-16"><a href="#cb11-16" tabindex="-1"></a>  <span class="at">esituation_11_col =</span> Situation_Provider_Primary_Impression_Code_And_Description_eSituation_11,</span>
+<span id="cb11-17"><a href="#cb11-17" tabindex="-1"></a>  <span class="at">esituation_12_col =</span> Situation_Provider_Secondary_Impression_Description_And_Code_List_eSituation_12,</span>
+<span id="cb11-18"><a href="#cb11-18" tabindex="-1"></a>  <span class="at">emedications_03_col =</span> Patient_Medication_Given_or_Administered_Description_And_RXCUI_Codes_List_eMedications_03</span>
+<span id="cb11-19"><a href="#cb11-19" tabindex="-1"></a>)</span>
+<span id="cb11-20"><a href="#cb11-20" tabindex="-1"></a></span>
+<span id="cb11-21"><a href="#cb11-21" tabindex="-1"></a><span class="co"># print structure of the results using `base::summary()`</span></span>
+<span id="cb11-22"><a href="#cb11-22" tabindex="-1"></a>populations_asthma_01 <span class="sc">|&gt;</span> <span class="fu">summary</span>()</span>
+<span id="cb11-23"><a href="#cb11-23" tabindex="-1"></a><span class="co">#&gt;                      Length Class  Mode</span></span>
+<span id="cb11-24"><a href="#cb11-24" tabindex="-1"></a><span class="co">#&gt; filter_process        2     tbl_df list</span></span>
+<span id="cb11-25"><a href="#cb11-25" tabindex="-1"></a><span class="co">#&gt; adults               16     tbl_df list</span></span>
+<span id="cb11-26"><a href="#cb11-26" tabindex="-1"></a><span class="co">#&gt; peds                 16     tbl_df list</span></span>
+<span id="cb11-27"><a href="#cb11-27" tabindex="-1"></a><span class="co">#&gt; initial_population   16     tbl_df list</span></span>
+<span id="cb11-28"><a href="#cb11-28" tabindex="-1"></a><span class="co">#&gt; computing_population 16     tbl_df list</span></span>
+<span id="cb11-29"><a href="#cb11-29" tabindex="-1"></a><span class="co">#&gt; missingness           6     tbl_df list</span></span></code></pre></div>
+<p>This output provides a structured view of how records were filtered
+through the NEMSQA criteria. It allows you to inspect the initial
+population, denominator‑eligible records, age‑specific subgroups, and
+missingness summaries for required fields.</p>
+</div>
+<div id="examine-a-summary-of-counts-for-the-nemsqa-population" class="section level3">
+<h3>Examine a summary of counts for the NEMSQA population</h3>
+<p>The <code>*_population()</code> functions return several tibbles that
+summarize how records were filtered into the final population of
+interest. One of the most useful is the <code>filter_process</code>
+tibble. It shows the number of records remaining after each inclusion or
+exclusion step defined by NEMSQA.</p>
+<div id="asthma-01-summary-of-attributes-of-the-target-population" class="section level4">
+<h4>Asthma-01 summary of attributes of the target population</h4>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="co"># Display counts for each filtering step</span></span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>populations_asthma_01<span class="sc">$</span>filter_process</span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a><span class="co">#&gt; # A tibble: 7 × 2</span></span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a><span class="co">#&gt;   filter             count</span></span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a><span class="co">#&gt;   &lt;chr&gt;              &lt;int&gt;</span></span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a><span class="co">#&gt; 1 911 calls           2400</span></span>
+<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a><span class="co">#&gt; 2 Asthma cases         109</span></span>
+<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a><span class="co">#&gt; 3 Beta agonist cases  1482</span></span>
+<span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a><span class="co">#&gt; 4 Adults denominator     4</span></span>
+<span id="cb12-10"><a href="#cb12-10" tabindex="-1"></a><span class="co">#&gt; 5 Peds denominator      25</span></span>
+<span id="cb12-11"><a href="#cb12-11" tabindex="-1"></a><span class="co">#&gt; 6 Initial population    29</span></span>
+<span id="cb12-12"><a href="#cb12-12" tabindex="-1"></a><span class="co">#&gt; 7 Total dataset      10000</span></span></code></pre></div>
+<p><code>filter_process</code> is typically where analysts can look
+first when values seem off.</p>
+</div>
+</div>
+<div id="using-filter_process-from-the-population-functions" class="section level3">
+<h3>Using filter_process from the population functions</h3>
+<p>Given that this vignette uses synthetic data, the counts may not
+reflect realistic populations. However, the workflow remains the same
+when working with real EMS data. The values in filter_process represent
+distinct record counts at each stage (using
+<code>dplyr::distinct()</code> internally). Reviewing these counts,
+along with the missingness tibble returned by the population function,
+can help diagnose data quality issues and better understand the
+composition of the population being evaluated.</p>
+</div>
+</div>
+</div>
+<div id="common-pitfalls-for-new-r-users" class="section level1">
+<h1>Common Pitfalls for New R Users</h1>
+<p>Users who are new to R often encounter several predictable issues
+when preparing data for NEMSQA measure calculation. The sections below
+highlight the most common problems and how to avoid them. Addressing
+these issues before running measures improves reproducibility and
+reduces debugging time.</p>
+<div id="incorrect-variable-types" class="section level2">
+<h2>Incorrect variable types</h2>
+<p>Many NEMSQA logic components require numeric fields. If these values
+are imported as character strings, the measure functions will fail.
+Always verify column types before running a measure and convert them as
+needed to meet <code>nemsqar</code> validation requirements.</p>
+</div>
+<div id="unintended-name-changes" class="section level2">
+<h2>Unintended name changes</h2>
+<p>Column names must align with the NEMSIS fields that each function
+argument represents. You may name your columns however you prefer, but
+the values that originate from <strong>eResponse.05</strong> must be
+supplied to the <code>eresponse_05_col</code> argument. The function
+relies on the data itself, not the literal column name, but incorrect
+mapping will cause errors.</p>
+</div>
+<div id="missing-required-tables" class="section level2">
+<h2>Missing required tables</h2>
+<p>Each measure requires a specific set of input tables. If a required
+table is not provided, the function will return an error. Ensure that
+all necessary tables are loaded and cleaned before running the
+measure.</p>
+</div>
+<div id="duplicated-records" class="section level2">
+<h2>Duplicated records</h2>
+<p>NEMSQA measures assume that each patient or encounter appears once in
+the relevant input tables. Duplicate rows can shift denominator counts,
+alter inclusion, or create unintended exclusions. Although
+<code>nemsqar</code> includes safeguards to detect some duplication, it
+is best practice to review your data for repeated records and to check
+for unintended Cartesian joins created during data extraction or table
+merging.</p>
+</div>
+</div>
+<div id="next-steps" class="section level1">
+<h1>Next Steps</h1>
+<p>This vignette introduced the core workflow for calculating NEMSQA
+measures using <code>nemsqar</code>. After reviewing these examples,
+users may wish to expand their analyses by exploring additional
+measures, integrating their own EMS datasets, or incorporating these
+workflows into automated reporting pipelines. The package reference
+documentation provides detailed descriptions of each function, and
+additional vignettes will demonstrate multi‑measure workflows,
+validation strategies, and integration with reproducible reporting tools
+such as Quarto and R Markdown.</p>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

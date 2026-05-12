@@ -47,6 +47,10 @@
 #'
 #' @author Samuel Kordik, BBA, BS
 #'
+#' @keywords internal
+#'
+#' @noRd
+#'
 summarize_measure <- function(
   data,
   measure_name,
@@ -58,10 +62,10 @@ summarize_measure <- function(
   correct = TRUE,
   ...
 ) {
-  # Ensure the confidence interval method is valid
+  # Ensure the confidence interval method is valid ----
   method <- match.arg(method)
 
-  # If confidence intervals are NOT requested, compute basic summary statistics
+  # If confidence intervals are NOT requested, compute basic summary statistics ----
   if (!confidence_interval) {
     data |>
       dplyr::summarize(
@@ -74,7 +78,7 @@ summarize_measure <- function(
         ...
       )
 
-    # If confidence intervals ARE requested, compute summary statistics and CI
+    # If confidence intervals ARE requested, compute summary statistics and CI ----
   } else {
     data |>
       dplyr::summarize(

@@ -1,3 +1,68 @@
+# nemsqar 1.2.0
+- Update `trauma_04_population()` to look to the facility ID instead of the
+  hospital capabilities for performance measurement. This is a breaking change
+  but will make the measure more accurate. This change comes as part of the
+  NEMSQA Measure Development committee has discussed this action seeing dismal
+  national performance on this measure.
+- Added the new function `nemsqa_missing_summary()` to summarize missing data
+  within each `*_popoulation()` function and to be included in the `list` object
+  returned by the same functions.
+- Added the first `nemsqar` vignette! Please use `vignette(topic = "nemsqar",
+  package = "nemsqar")` to check it out.
+- Added tests for `validate_set()`, `validate_numeric()` tests were improved,
+  `validate_names()`, added tests for `validate_length()` and
+  `compare_formals()`. 
+- Removed documentation for the `validate_*()` family of functions and use
+  keyword internal in their documentation. 
+- `results_summarize()` and `summarize_measure()` no longer have external facing
+  documentation and are internal. 
+- Added a contributor's code of conduct.
+- Removed some language giving thanks to early contributors from the README file
+  and placed that in the initial release of `nemsqar`.
+- Implemented `usethis::use_tidy_*` package helpers to clean up various parts of
+  the package such as workflows and using `Air` as the code formatter
+  throughout. 
+
+Thanks to [&#x0040;bemts-hhs](https://github.com/bemts-hhs) (maintenance and
+programming in this release),
+[&#x0040;eliza-little](https://github.com/eliza-little) (for submitting issue
+[#4](https://github.com/bemts-hhs/nemsqar/issues/4)), and
+[&#x0040;samuelkordik](https://github.com/samuelkordik) (submitted issue
+[#15](https://github.com/bemts-hhs/nemsqar/issues/15) and reviewed PR
+[#23](https://github.com/bemts-hhs/nemsqar/pull/23)) for all your contributions
+to this CRAN release!
+
+# nemsqar 1.1.4
+* Documentation using @inheritParams to help with making functions more
+  maintainable.
+* Update regex within each function so they utilize paste() to make the regex
+  more maintainable.
+* Created `constants.R` to contain all regex for the package as internal to the
+  package. `constants.R` is loaded at package install / load and these regex
+  objects are available to the package for the functions to reference.
+* Put regex (be sensitive to measure-specific regex) into .R/constants.R file to
+  centralize these and functions just reference these objects. Then, we can
+  delete all regex within functions for an even easier time maintaining the
+  package. This addresses issue #22.
+* Update data validation where applicable to use functional validation.
+* Abbreviate the code base by removing separate workflows for the 'df' and
+  'table' data sources. Unify these by always ending up with 'tables' by
+  splitting up a 'df' if supplied, and then only needing to proceed with major
+  data validation and the analysis on objects named like `*_table`. 
+* Replace data validation that involve rlang::as_name(quo) with making this code
+  more readable by creating a separate `*_name` object for applicable columns
+  and then running validation on `object[[name]]`.
+
+# nemsqar 1.1.3
+- Added navigation to all major functions in the package. This was done by
+  adding `----` to the end of most comments.
+- Some functions received code formatting due to the addition of the `----` or
+  just by virtue of editing the script, the `Air` package does the formatting
+  via Positron.
+- Improved comments in the code in some functions and removed one code
+  redundancy in a function that performed the exact same check that the
+  `*_table` and `df` arguments were receiving inputs simulataneously.
+
 # nemsqar 1.1.2
 
 - Fixed broken URLs in the documentation for `nemsqa_binomial_confint()`.
@@ -65,3 +130,7 @@ which was corrected to be `"All initial population successful intubation with no
 
 #### Utility Functions  
 - `results_summarize()`, `summarize_measure()`
+
+## Thanks!
+
+A big loud thanks to Sheree Murphy from NEMSQA, Peter Geissert from Oregon EMS & Trauma Systems, Jeffrey Jarvis medical director for the Metropolitan Area EMS Authority (Fort Worth, Texas), and Marshall Washick (Washington D.C. Fire) for all their input and consultation!

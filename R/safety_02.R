@@ -8,46 +8,9 @@
 #' pediatric groups based on their age, and summarizes results with a total
 #' population count as well.
 #'
-#' @param df A data frame where each row is an observation, and each column
-#'   represents a feature.
-#' @param patient_scene_table A data.frame or tibble containing only epatient
-#'   and escene fields as a fact table.
-#' @param response_table A data.frame or tibble containing only the eresponse
-#'   fields needed for this measure's calculations.
-#' @param disposition_table A data.frame or tibble containing only the
-#'   edisposition fields needed for this measure's calculations.
-#' @param erecord_01_col The column representing the EMS record unique
-#'   identifier.
-#' @param incident_date_col Column that contains the incident date. This
-#'   defaults to `NULL` as it is optional in case not available due to PII
-#'   restrictions.
-#' @param patient_DOB_col Column that contains the patient's date of birth. This
-#'   defaults to `NULL` as it is optional in case not available due to PII
-#'   restrictions.
-#' @param epatient_15_col Column giving the calculated age value.
-#' @param epatient_16_col Column giving the provided age unit value.
-#' @param eresponse_05_col Column giving response codes, identifying 911
-#'   responses.
-#' @param edisposition_18_col Column giving transport mode descriptors,
-#'   including possible lights-and-sirens indicators.
-#' @param edisposition_28_col Column giving patient evaluation and care
-#'   categories for the EMS response.
-#' @param transport_disposition_cols One or more unquoted column names (such as
-#'   edisposition.12, edisposition.30) containing transport disposition details.
-#' @param confidence_interval `r lifecycle::badge("experimental")` Logical. If
-#'   `TRUE`, the function calculates a confidence interval for the proportion
-#'   estimate.
-#' @param method `r lifecycle::badge("experimental")`Character. Specifies the
-#'   method used to calculate confidence intervals. Options are `"wilson"`
-#'   (Wilson score interval) and `"clopper-pearson"` (exact binomial interval).
-#'   Partial matching is supported, so `"w"` and `"c"` can be used as shorthand.
-#' @param conf.level `r lifecycle::badge("experimental")`Numeric. The confidence
-#'   level for the interval, expressed as a proportion (e.g., 0.95 for a 95%
-#'   confidence interval). Defaults to 0.95.
-#' @param correct `r lifecycle::badge("experimental")`Logical. If `TRUE`,
-#'   applies a continuity correction to the Wilson score interval when `method =
-#'   "wilson"`. Defaults to `TRUE`.
-#' @param ... optional additional arguments to pass onto `dplyr::summarize`.
+#' @inheritParams airway_01_population
+#' @inheritParams safety_02_population
+#' @inheritParams airway_01
 #'
 #' @return A data.frame summarizing results for two population groups (All,
 #'   Adults and Peds) with the following columns:
@@ -80,12 +43,14 @@
 #'   safety_02(
 #'     df = test_data,
 #'     erecord_01_col = erecord_01,
+#'     incident_date_col = NULL,
+#'     patient_DOB_col = NULL,
 #'     epatient_15_col = epatient_15,
 #'     epatient_16_col = epatient_16,
 #'     eresponse_05_col = eresponse_05,
 #'     edisposition_18_col = edisposition_18,
 #'     edisposition_28_col = edisposition_28,
-#'     transport_disposition_cols = edisposition_30,
+#'     transport_disposition_col = edisposition_30,
 #'     confidence_interval = TRUE
 #'   )
 #'
@@ -93,200 +58,271 @@
 #'
 #' @export
 #'
-safety_02 <- function(df = NULL,
-                      patient_scene_table = NULL,
-                      response_table = NULL,
-                      disposition_table = NULL,
-                      erecord_01_col,
-                      incident_date_col = NULL,
-                      patient_DOB_col = NULL,
-                      epatient_15_col,
-                      epatient_16_col,
-                      eresponse_05_col,
-                      edisposition_18_col,
-                      edisposition_28_col,
-                      transport_disposition_cols,
-                      confidence_interval = FALSE,
-                      method = c("wilson", "clopper-pearson"),
-                      conf.level = 0.95,
-                      correct = TRUE,
-                      ...) {
+safety_02 <- function(
+  df = NULL,
+  patient_scene_table = NULL,
+  response_table = NULL,
+  disposition_table = NULL,
+  erecord_01_col,
+  incident_date_col = NULL,
+  patient_DOB_col = NULL,
+  epatient_15_col,
+  epatient_16_col,
+  eresponse_05_col,
+  edisposition_18_col,
+  edisposition_28_col,
+  transport_disposition_col,
+  transport_disposition_cols = lifecycle::deprecated(),
+  confidence_interval = FALSE,
+  method = c("wilson", "clopper-pearson"),
+  conf.level = 0.95,
+  correct = TRUE,
+  ...
+) {
+  # Handle deprecated transport_disposition_cols argument ----
+  if (lifecycle::is_present(transport_disposition_cols)) {
+    # Issue an error
+    lifecycle::deprecate_stop(
+      when = "1.2.0",
+      what = "safety_04(transport_disposition_cols)",
+      with = "safety_04(transport_disposition_col)"
+    )
+  }
 
-  # Set default method and adjustment method
+  # Set default method and adjustment method ----
   method <- match.arg(method, choices = c("wilson", "clopper-pearson"))
 
-  # utilize applicable tables to analyze the data for the measure
+  # ensure that not all table arguments AND the df argument are fulfilled ----
+  # user only passes df or all table arguments
+
+  if (
+    any(
+      !is.null(patient_scene_table),
+      !is.null(response_table),
+      !is.null(disposition_table)
+    ) &&
+
+      !is.null(df)
+  ) {
+    cli::cli_abort(
+      "{.fn safety_02} will only work by passing a {.cls data.frame} or {.cls tibble} to the {.var df} argument, or by fulfilling all table arguments.  Please choose to either pass an object of class {.cls data.frame} or {.cls tibble} to the {.var df} argument, or fulfill all table arguments."
+    )
+  }
+
+  # ensure that df or all table arguments are fulfilled ----
+
+  if (
+    all(
+      is.null(patient_scene_table),
+      is.null(response_table),
+      is.null(disposition_table)
+    ) &&
+      is.null(df)
+  ) {
+    cli::cli_abort(
+      "{.fn safety_02} will only work by passing a {.cls data.frame} or {.cls tibble} to the {.var df} argument, or by fulfilling all table arguments.  Please choose to either pass an object of class {.cls data.frame} or {.cls tibble} to the {.var df} argument, or fulfill all table arguments."
+    )
+  }
+
+  # ensure all *_col arguments are fulfilled ----
+  if (
+    any(
+      missing(erecord_01_col),
+      missing(incident_date_col),
+      missing(patient_DOB_col),
+      missing(epatient_15_col),
+      missing(epatient_16_col),
+      missing(eresponse_05_col),
+      missing(edisposition_18_col),
+      missing(edisposition_28_col),
+      missing(transport_disposition_col)
+    )
+  ) {
+    cli::cli_abort(
+      "One or more of the *_col arguments is missing.  Please make sure you pass an unquoted column to each of the *_col arguments to run {.fn safety_02}."
+    )
+  }
+
+  # User must pass either `df` or all table arguments, but not both
   if (
     all(
       !is.null(patient_scene_table),
       !is.null(response_table),
       !is.null(disposition_table)
-    ) && is.null(df)
-
+    ) &&
+      is.null(df)
   ) {
-
-    # Start timing the function execution
+    # Start timing the function execution ----
     start_time <- Sys.time()
 
-    # header
+    # header ----
     cli::cli_h1("Safety-02")
 
-    # header
+    # header ----
     cli::cli_h2("Gathering Records for Safety-02")
 
-    # gather the population of interest
-    safety_02_populations <- safety_02_population(patient_scene_table = patient_scene_table,
-                                                  response_table = response_table,
-                                                  disposition_table = disposition_table,
-                                                  erecord_01_col = {{ erecord_01_col }},
-                                                  incident_date_col = {{ incident_date_col }},
-                                                  patient_DOB_col = {{ patient_DOB_col }},
-                                                  epatient_15_col = {{ epatient_15_col }},
-                                                  epatient_16_col = {{ epatient_16_col }},
-                                                  eresponse_05_col = {{ eresponse_05_col }},
-                                                  edisposition_18_col = {{ edisposition_18_col }},
-                                                  edisposition_28_col = {{ edisposition_28_col }},
-                                                  transport_disposition_cols = {{ transport_disposition_cols }}
-                                                  )
+    # gather the population of interest ----
+    safety_02_populations <- safety_02_population(
+      patient_scene_table = patient_scene_table,
+      response_table = response_table,
+      disposition_table = disposition_table,
+      erecord_01_col = {{ erecord_01_col }},
+      incident_date_col = {{ incident_date_col }},
+      patient_DOB_col = {{ patient_DOB_col }},
+      epatient_15_col = {{ epatient_15_col }},
+      epatient_16_col = {{ epatient_16_col }},
+      eresponse_05_col = {{ eresponse_05_col }},
+      edisposition_18_col = {{ edisposition_18_col }},
+      edisposition_28_col = {{ edisposition_28_col }},
+      transport_disposition_col = {{ transport_disposition_col }}
+    )
 
-    # create a separator
+    # create a separator ----
     cli::cli_text("\n")
 
-    # header for calculations
+    # header for calculations ----
     cli::cli_h2("Calculating Safety-02")
 
-    # summary
-    safety.02 <- results_summarize(total_population = safety_02_populations$initial_population,
-                                   adult_population = safety_02_populations$adults,
-                                   peds_population = safety_02_populations$peds,
-                                   population_names = c("all", "adults", "peds"),
-                                   measure_name = "Safety-02",
-                                   numerator_col = NO_LS_CHECK,
-                                   confidence_interval = confidence_interval,
-                                   method = method,
-                                   conf.level = conf.level,
-                                   correct = correct,
-                                   ...)
+    # summary ----
+    safety.02 <- results_summarize(
+      total_population = safety_02_populations$initial_population,
+      adult_population = safety_02_populations$adults,
+      peds_population = safety_02_populations$peds,
+      population_names = c("all", "adults", "peds"),
+      measure_name = "Safety-02",
+      numerator_col = NO_LS_CHECK,
+      confidence_interval = confidence_interval,
+      method = method,
+      conf.level = conf.level,
+      correct = correct,
+      ...
+    )
 
-    # create a separator
+    # create a separator ----
     cli::cli_text("\n")
 
-    # Calculate and display the runtime
+    # Calculate and display the runtime ----
     end_time <- Sys.time()
     run_time_secs <- difftime(end_time, start_time, units = "secs")
     run_time_secs <- as.numeric(run_time_secs)
 
     if (run_time_secs >= 60) {
-
-      run_time <- round(run_time_secs / 60, 2)  # Convert to minutes and round
-      cli::cli_alert_success("Function completed in {cli::col_green(paste0(run_time, 'm'))}.")
-
+      run_time <- round(run_time_secs / 60, 2) # Convert to minutes and round
+      cli::cli_alert_success(
+        "Function completed in {cli::col_green(paste0(run_time, 'm'))}."
+      )
     } else {
-
-      run_time <- round(run_time_secs, 2)  # Keep in seconds and round
-      cli::cli_alert_success("Function completed in {cli::col_green(paste0(run_time, 's'))}.")
-
+      run_time <- round(run_time_secs, 2) # Keep in seconds and round
+      cli::cli_alert_success(
+        "Function completed in {cli::col_green(paste0(run_time, 's'))}."
+      )
     }
 
-    # create a separator
+    # create a separator ----
     cli::cli_text("\n")
 
-    # when confidence interval is "wilson", check for n < 10
+    # when confidence interval is "wilson", check for n < 10 ----
     # to warn about incorrect Chi-squared approximation
-    if (any(safety.02$denominator < 10) && method == "wilson" && confidence_interval) {
-
-      cli::cli_warn("In {.fn prop.test}: Chi-squared approximation may be incorrect for any n < 10.")
-
+    if (
+      any(safety.02$denominator < 10) &&
+        method == "wilson" &&
+        confidence_interval
+    ) {
+      cli::cli_warn(
+        "In {.fn prop.test}: Chi-squared approximation may be incorrect for any n < 10."
+      )
     }
 
     return(safety.02)
-
-  } else if(
-
+  } else if (
     all(
       is.null(patient_scene_table),
       is.null(response_table),
       is.null(disposition_table)
-    ) && !is.null(df)
+    ) &&
+      !is.null(df)
 
-    # utilize a dataframe to analyze the data for the measure analytics
-
+    # utilize a dataframe to analyze the data for the measure analytics ----
   ) {
-
-    # Start timing the function execution
+    # Start timing the function execution ----
     start_time <- Sys.time()
 
-    # header
+    # header ----
     cli::cli_h1("Safety-02")
 
-    # header
+    # header ----
     cli::cli_h2("Gathering Records for Safety-02")
 
-    # gather the population of interest
-    safety_02_populations <- safety_02_population(df = df,
-                                                  erecord_01_col = {{ erecord_01_col }},
-                                                  incident_date_col = {{ incident_date_col }},
-                                                  patient_DOB_col = {{ patient_DOB_col }},
-                                                  epatient_15_col = {{ epatient_15_col }},
-                                                  epatient_16_col = {{ epatient_16_col }},
-                                                  eresponse_05_col = {{ eresponse_05_col }},
-                                                  edisposition_18_col = {{ edisposition_18_col }},
-                                                  edisposition_28_col = {{ edisposition_28_col }},
-                                                  transport_disposition_cols = {{ transport_disposition_cols }}
-                                                  )
+    # gather the population of interest ----
+    safety_02_populations <- safety_02_population(
+      df = df,
+      erecord_01_col = {{ erecord_01_col }},
+      incident_date_col = {{ incident_date_col }},
+      patient_DOB_col = {{ patient_DOB_col }},
+      epatient_15_col = {{ epatient_15_col }},
+      epatient_16_col = {{ epatient_16_col }},
+      eresponse_05_col = {{ eresponse_05_col }},
+      edisposition_18_col = {{ edisposition_18_col }},
+      edisposition_28_col = {{ edisposition_28_col }},
+      transport_disposition_col = {{ transport_disposition_col }}
+    )
 
-    # create a separator
+    # create a separator ----
     cli::cli_text("\n")
 
-    # header for calculations
+    # header for calculations ----
     cli::cli_h2("Calculating Safety-02")
 
-    # summary
-    safety.02 <- results_summarize(total_population = safety_02_populations$initial_population,
-                                   adult_population = safety_02_populations$adults,
-                                   peds_population = safety_02_populations$peds,
-                                   population_names = c("all", "adults", "peds"),
-                                   measure_name = "Safety-02",
-                                   numerator_col = NO_LS_CHECK,
-                                   confidence_interval = confidence_interval,
-                                   method = method,
-                                   conf.level = conf.level,
-                                   correct = correct,
-                                   ...)
+    # summary ----
+    safety.02 <- results_summarize(
+      total_population = safety_02_populations$initial_population,
+      adult_population = safety_02_populations$adults,
+      peds_population = safety_02_populations$peds,
+      population_names = c("all", "adults", "peds"),
+      measure_name = "Safety-02",
+      numerator_col = NO_LS_CHECK,
+      confidence_interval = confidence_interval,
+      method = method,
+      conf.level = conf.level,
+      correct = correct,
+      ...
+    )
 
-    # create a separator
+    # create a separator ----
     cli::cli_text("\n")
 
-    # Calculate and display the runtime
+    # Calculate and display the runtime ----
     end_time <- Sys.time()
     run_time_secs <- difftime(end_time, start_time, units = "secs")
     run_time_secs <- as.numeric(run_time_secs)
 
     if (run_time_secs >= 60) {
-
-      run_time <- round(run_time_secs / 60, 2)  # Convert to minutes and round
-      cli::cli_alert_success("Function completed in {cli::col_green(paste0(run_time, 'm'))}.")
-
+      run_time <- round(run_time_secs / 60, 2) # Convert to minutes and round
+      cli::cli_alert_success(
+        "Function completed in {cli::col_green(paste0(run_time, 'm'))}."
+      )
     } else {
-
-      run_time <- round(run_time_secs, 2)  # Keep in seconds and round
-      cli::cli_alert_success("Function completed in {cli::col_green(paste0(run_time, 's'))}.")
-
+      run_time <- round(run_time_secs, 2) # Keep in seconds and round
+      cli::cli_alert_success(
+        "Function completed in {cli::col_green(paste0(run_time, 's'))}."
+      )
     }
 
-    # create a separator
+    # create a separator ----
     cli::cli_text("\n")
 
-    # when confidence interval is "wilson", check for n < 10
+    # when confidence interval is "wilson", check for n < 10 ----
     # to warn about incorrect Chi-squared approximation
-    if (any(safety.02$denominator < 10) && method == "wilson" && confidence_interval) {
-
-      cli::cli_warn("In {.fn prop.test}: Chi-squared approximation may be incorrect for any n < 10.")
-
+    if (
+      any(safety.02$denominator < 10) &&
+        method == "wilson" &&
+        confidence_interval
+    ) {
+      cli::cli_warn(
+        "In {.fn prop.test}: Chi-squared approximation may be incorrect for any n < 10."
+      )
     }
 
     return(safety.02)
-
   }
-
 }
