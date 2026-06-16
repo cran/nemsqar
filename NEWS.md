@@ -1,3 +1,13 @@
+# nemsqar 1.2.1
+- Updated how wrapper functions report runtime (e.g., `airway_01()`). Runtime is
+  now calculated using `difftime(units = "auto")`, converting the result with
+  `as.numeric()` and extracting the dynamic time unit via 
+  `attr(which = "units")`. This makes the time unit automatic and avoids
+  potential downstream issues.  
+- Corrected a typo involving ETCO2 across several functions, `globalVariables.R`,
+  and `constants.R`, where it appeared as “etc02” in various cases. All instances
+  were fixed by replacing the zero with the letter “o” (case‑sensitive). 
+
 # nemsqar 1.2.0
 - Update `trauma_04_population()` to look to the facility ID instead of the
   hospital capabilities for performance measurement. This is a breaking change
